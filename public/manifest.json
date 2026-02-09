@@ -1,0 +1,54 @@
+{
+    "name": "Testoloji | Yapay Zeka Destekli Soru Bankası",
+    "short_name": "Testoloji",
+    "description": "Profesyonel soru bankası ve test mizanpaj çözümü.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#f97316",
+    "orientation": "portrait",
+    "categories": [
+        "education",
+        "productivity"
+    ],
+    "shortcuts": [
+        {
+            "name": "Yeni Proje Oluştur",
+            "short_name": "Yeni Proje",
+            "description": "Hızlıca yeni bir test projesi başlat",
+            "url": "/dashboard?action=new",
+            "icons": [
+                {
+                    "src": "/icons/icon-192x192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Projelerim",
+            "short_name": "Projelerim",
+            "description": "Tüm projelerini görüntüle",
+            "url": "/dashboard",
+            "icons": [
+                {
+                    "src": "/icons/icon-192x192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        }
+    ],
+    "icons": [
+        {
+            "src": "/icons/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icons/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}
