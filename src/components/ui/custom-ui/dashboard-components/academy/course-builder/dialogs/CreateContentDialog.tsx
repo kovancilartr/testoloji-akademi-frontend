@@ -121,7 +121,7 @@ export function CreateContentDialog({
                                     <SelectTrigger className="h-11 rounded-xl border-slate-200 font-bold">
                                         <SelectValue placeholder="Sınav seçiniz..." />
                                     </SelectTrigger>
-                                    <SelectContent className="rounded-xl border-slate-200">
+                                    <SelectContent className="rounded-xl border-slate-200 z-[200]">
                                         <ScrollArea className="h-[200px]">
                                             {projects?.map(p => (
                                                 <SelectItem key={p.id} value={p.id} className="font-bold cursor-pointer">{p.name}</SelectItem>
