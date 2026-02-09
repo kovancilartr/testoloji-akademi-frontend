@@ -9,34 +9,39 @@ Testoloji, hem modern bir **Soru Bankası/Dijitalleştirme** aracı hem de kapsa
 
 ## ✨ Öne Çıkan Özellikler
 
+### 🔐 Güvenlik & Yetkilendirme (RBAC)
+*   **Role-Based Access Control:** `ADMIN`, `TEACHER` ve `STUDENT` rolleri için tam ayrıştırılmış arayüz.
+*   **RoleProtect Wrapper:** Sayfa ve bileşen seviyesinde yetki kontrolü sağlayan gelişmiş koruma katmanı.
+*   **Client-Side Security:** Yetkisiz erişimlerde kullanıcıyı ana sayfaya yönlendiren veya bilgilendiren şık Unauthorized UI.
+
 ### 🏗️ İnteraktif Kurs Oluşturucu (Academy)
+*   **Müfredat Yönetimi:** Kurs -> Bölüm -> İçerik hiyerarşisinde ders yapısı oluşturma.
 *   **Drag & Drop (Sürükle-Bırak):** Müfredat bölümlerini ve içeriklerini `@hello-pangea/dnd` ile saniyeler içinde düzenleyin.
-*   **Zengin İçerik Desteği:** Video dersler, dökümanlar ve dijital testler ekleyin.
-*   **Hızlı Yönetim:** Tek bir panelden kurs ayarlarını, öğrenci atamalarını ve yayın durumunu kontrol edin.
-*   **Optimistic UI:** `React Query` ile yapılan her değişiklik anında arayüze yansır, hızdan ödün verilmez.
+*   **Zengin İçerik Desteği:** Video dersler, PDF dökümanları ve interaktif dijital testler.
+*   **Optimistic UI:** `React Query` ile yapılan her değişiklik anında arayüze yansır.
 
 ### 📊 Performans Laboratuvarı (Analytics)
-*   **Gelişmiş Dashboard:** Sınıf ortalaması, aktif öğrenci sayısı ve başarı trendleri.
-*   **Detaylı Analiz:** Her öğrenci için Doğru, Yanlış ve Net (4Y 1D) takibi.
+*   **Öğretmen Dashboard:** Sınıf ortalaması, aktif öğrenci sayısı ve gelişim trendlerini izleyin.
+*   **Detaylı Analiz:** Her öğrenci (Koçluk Sistemi) için Doğru, Yanlış ve Net (4Y 1D) takibi.
 *   **Görsel Grafikler:** `Recharts` ile desteklenen interaktif başarı dağılım grafikleri.
 
 ### 📝 Sürükleyici Sınav Deneyimi
 *   **Optik Form Arayüzü:** Dijital sınavlar için kafa karıştırmayan, optik form esintili tasarım.
-*   **Anlık Geri Bildirim:** Sınav sonunda detaylı karne (Doğru/Yanlış/Net) ve detaylı inceleme modu.
 *   **Canlı Süre Takibi:** Sınav süresi yönetimi ve otomatik bitirme özelliği.
+*   **Hızlı Karne:** Sınav biter bitmez anlık sonuç ve detaylı analiz.
 
-### ✂️ Akıllı Soru Dijitalleştirme
-*   **AI Scan:** PDF'lerden soruları yapay zeka ile otomatik algılama ve kırpma.
-*   **Hassas Düzenleme:** Gelişmiş crop araçları ve soru havuzu yönetimi.
+---
 
 ## 🛠️ Teknoloji Yığını
 
-*   **Frontend:** [Next.js 14+](https://nextjs.org/) (App Router)
+*   **Frontend:** [Next.js 14+](https://nextjs.org/) (App Router & Server Actions)
 *   **Stil:** Tailwind CSS & [Shadcn UI](https://ui.shadcn.com/)
+*   **Tasarım:** Framer Motion (Akıcı Geçişler)
 *   **State & Cache:** [@tanstack/react-query](https://tanstack.com/query/latest)
-*   **Sıralama:** `@hello-pangea/dnd`
 *   **Grafikler:** `Recharts`
 *   **İkonlar:** Lucide React
+
+---
 
 ## 🚀 Hızlı Başlangıç
 
@@ -61,15 +66,14 @@ Testoloji, hem modern bir **Soru Bankası/Dijitalleştirme** aracı hem de kapsa
     npm run dev
     ```
 
-4.  **Hemen Deneyimleyin:**
-    Tarayıcınızda `http://localhost:3000` adresine gidin.
+---
 
 ## 🤝 Mimari Yaklaşım
 
 *   **Component-Driven:** Yeniden kullanılabilir, bağımsız UI bileşenleri.
-*   **Hook-First logic:** Veri çekme ve mutasyon işlemlerinin `custom hooks` altında toplanması.
-*   **Premium UX:** Akıcı animasyonlar (framer-motion) ve minimalist tasarım dili.
+*   **Protection Layer:** Sayfaların rol bazlı korunması (`components/providers/RoleProtect.tsx`).
+*   **Custom Hooks:** API etkileşimlerinin ve karmaşık mantıkların component'lerden ayrıştırılması.
 
 ---
 ## 📝 Lisans
-Bu proje [MIT](LICENSE) lisansı ile lisanslanmıştır.
+Bu proje özel bir mülkiyettir. Tüm hakları saklıdır.
