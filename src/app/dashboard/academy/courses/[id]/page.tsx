@@ -32,6 +32,9 @@ import { PublishCourseDialog } from "@/components/ui/custom-ui/dashboard-compone
 import { CreateModuleDialog } from "@/components/ui/custom-ui/dashboard-components/academy/course-builder/dialogs/CreateModuleDialog";
 import { CreateContentDialog, ContentData } from "@/components/ui/custom-ui/dashboard-components/academy/course-builder/dialogs/CreateContentDialog";
 
+import { RoleProtect } from "@/components/providers/RoleProtect";
+import { Role } from "@/types/auth";
+
 export default function CourseBuilderPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const { data: course, isLoading } = useCourse(id);
@@ -247,125 +250,127 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
     if (!course) return <div className="p-10 text-center">Kurs bulunamadı.</div>;
 
     return (
-        <div className="flex-1 flex flex-col h-full bg-[#f8fafc] animate-in fade-in duration-500">
-            {/* Desktop Navbar / Header */}
-            <CourseHeader
-                course={course}
-                onBack={() => router.back()}
-                onOpenSettings={() => setIsSettingsModalOpen(true)}
-                onOpenPublish={() => setIsPublishModalOpen(true)}
-            />
+        <RoleProtect allowedRoles={[Role.TEACHER, Role.ADMIN]}>
+            <div className="flex-1 flex flex-col h-full bg-[#f8fafc] animate-in fade-in duration-500">
+                {/* Desktop Navbar / Header */}
+                <CourseHeader
+                    course={course}
+                    onBack={() => router.back()}
+                    onOpenSettings={() => setIsSettingsModalOpen(true)}
+                    onOpenPublish={() => setIsPublishModalOpen(true)}
+                />
 
-            {/* Course Content Area */}
-            <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 md:py-10">
-                <div className="max-w-4xl mx-auto space-y-4">
-                    <CourseContentList
-                        course={course}
-                        expandedModules={expandedModules}
-                        toggleModule={toggleModule}
-                        onDragEnd={onDragEnd}
-                        onAddModule={() => setIsModuleModalOpen(true)}
-                        onAddContent={(moduleId) => {
-                            setModuleEditId(null);
-                            setContentEditId(null);
-                            setSelectedModuleId(moduleId);
-                            setIsContentModalOpen(true);
-                        }}
-                        onEditModule={(module) => {
-                            setModuleEditId(module.id);
-                            setModuleTitle(module.title);
-                            setIsModuleModalOpen(true);
-                        }}
-                        onDeleteModule={handleDeleteModule}
-                        onEditContent={(moduleId, content) => {
-                            setSelectedModuleId(moduleId);
-                            setContentEditId(content.id);
-                            setContentData({
-                                title: content.title,
-                                type: content.type,
-                                url: content.url || "",
-                                projectId: content.projectId || "",
-                                duration: content.duration || 0,
-                                attemptLimit: content.attemptLimit || 0
-                            });
-                            setIsContentModalOpen(true);
-                        }}
-                        onDeleteContent={handleDeleteContent}
-                    />
+                {/* Course Content Area */}
+                <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 md:py-10">
+                    <div className="max-w-4xl mx-auto space-y-4">
+                        <CourseContentList
+                            course={course}
+                            expandedModules={expandedModules}
+                            toggleModule={toggleModule}
+                            onDragEnd={onDragEnd}
+                            onAddModule={() => setIsModuleModalOpen(true)}
+                            onAddContent={(moduleId) => {
+                                setModuleEditId(null);
+                                setContentEditId(null);
+                                setSelectedModuleId(moduleId);
+                                setIsContentModalOpen(true);
+                            }}
+                            onEditModule={(module) => {
+                                setModuleEditId(module.id);
+                                setModuleTitle(module.title);
+                                setIsModuleModalOpen(true);
+                            }}
+                            onDeleteModule={handleDeleteModule}
+                            onEditContent={(moduleId, content) => {
+                                setSelectedModuleId(moduleId);
+                                setContentEditId(content.id);
+                                setContentData({
+                                    title: content.title,
+                                    type: content.type,
+                                    url: content.url || "",
+                                    projectId: content.projectId || "",
+                                    duration: content.duration || 0,
+                                    attemptLimit: content.attemptLimit || 0
+                                });
+                                setIsContentModalOpen(true);
+                            }}
+                            onDeleteContent={handleDeleteContent}
+                        />
+                    </div>
                 </div>
+
+                {/* Float Action for Mobile (Add Module) */}
+                <div className="fixed bottom-6 right-6 md:hidden z-40">
+                    <Button
+                        className="w-14 h-14 rounded-full bg-slate-900 text-white shadow-2xl flex items-center justify-center p-0"
+                        onClick={() => setIsModuleModalOpen(true)}
+                    >
+                        <Plus className="w-6 h-6" />
+                    </Button>
+                </div>
+
+                {/* Dialogs */}
+                <CourseSettingsDialog
+                    isOpen={isSettingsModalOpen}
+                    onOpenChange={setIsSettingsModalOpen}
+                    settings={courseSettings}
+                    onSettingsChange={setCourseSettings}
+                    onSaveSettings={handleUpdateSettings}
+                    isLoadingSettings={updateCourse.isPending}
+                    studentSearch={studentSearch}
+                    onStudentSearchChange={setStudentSearch}
+                    filteredStudents={filteredStudents}
+                    enrollments={course.enrollments}
+                    onEnrollToggle={handleToggleEnroll}
+                    isEnrollLoading={enrollStudent.isPending || unenrollStudent.isPending}
+                />
+
+                <PublishCourseDialog
+                    isOpen={isPublishModalOpen}
+                    onOpenChange={setIsPublishModalOpen}
+                    isPublished={courseSettings.isPublished}
+                    onToggle={async () => {
+                        const next = !courseSettings.isPublished;
+                        setCourseSettings({ ...courseSettings, isPublished: next });
+                        await updateCourse.mutateAsync({ id, data: { ...courseSettings, isPublished: next } });
+                        toast.success(next ? "Kurs Başarıyla Yayına Alındı!" : "Kurs Taslak Moduna Çekildi.");
+                    }}
+                    isLoading={updateCourse.isPending}
+                />
+
+                <CreateModuleDialog
+                    isOpen={isModuleModalOpen}
+                    onOpenChange={(open) => {
+                        setIsModuleModalOpen(open);
+                        if (!open) {
+                            setModuleEditId(null);
+                            setModuleTitle("");
+                        }
+                    }}
+                    moduleTitle={moduleTitle}
+                    onModuleTitleChange={setModuleTitle}
+                    onSubmit={handleAddModule}
+                    isLoading={addModule.isPending || updateModule.isPending}
+                    mode={moduleEditId ? 'edit' : 'create'}
+                />
+
+                <CreateContentDialog
+                    isOpen={isContentModalOpen}
+                    onOpenChange={(open) => {
+                        setIsContentModalOpen(open);
+                        if (!open) {
+                            setContentEditId(null);
+                            setContentData({ title: "", type: "VIDEO", url: "", projectId: "", duration: 0, attemptLimit: 0 });
+                        }
+                    }}
+                    contentData={contentData}
+                    onContentDataChange={setContentData}
+                    onSubmit={handleAddContent}
+                    projects={projects || []}
+                    isLoading={addContent.isPending || updateContent.isPending}
+                    mode={contentEditId ? 'edit' : 'create'}
+                />
             </div>
-
-            {/* Float Action for Mobile (Add Module) */}
-            <div className="fixed bottom-6 right-6 md:hidden z-40">
-                <Button
-                    className="w-14 h-14 rounded-full bg-slate-900 text-white shadow-2xl flex items-center justify-center p-0"
-                    onClick={() => setIsModuleModalOpen(true)}
-                >
-                    <Plus className="w-6 h-6" />
-                </Button>
-            </div>
-
-            {/* Dialogs */}
-            <CourseSettingsDialog
-                isOpen={isSettingsModalOpen}
-                onOpenChange={setIsSettingsModalOpen}
-                settings={courseSettings}
-                onSettingsChange={setCourseSettings}
-                onSaveSettings={handleUpdateSettings}
-                isLoadingSettings={updateCourse.isPending}
-                studentSearch={studentSearch}
-                onStudentSearchChange={setStudentSearch}
-                filteredStudents={filteredStudents}
-                enrollments={course.enrollments}
-                onEnrollToggle={handleToggleEnroll}
-                isEnrollLoading={enrollStudent.isPending || unenrollStudent.isPending}
-            />
-
-            <PublishCourseDialog
-                isOpen={isPublishModalOpen}
-                onOpenChange={setIsPublishModalOpen}
-                isPublished={courseSettings.isPublished}
-                onToggle={async () => {
-                    const next = !courseSettings.isPublished;
-                    setCourseSettings({ ...courseSettings, isPublished: next });
-                    await updateCourse.mutateAsync({ id, data: { ...courseSettings, isPublished: next } });
-                    toast.success(next ? "Kurs Başarıyla Yayına Alındı!" : "Kurs Taslak Moduna Çekildi.");
-                }}
-                isLoading={updateCourse.isPending}
-            />
-
-            <CreateModuleDialog
-                isOpen={isModuleModalOpen}
-                onOpenChange={(open) => {
-                    setIsModuleModalOpen(open);
-                    if (!open) {
-                        setModuleEditId(null);
-                        setModuleTitle("");
-                    }
-                }}
-                moduleTitle={moduleTitle}
-                onModuleTitleChange={setModuleTitle}
-                onSubmit={handleAddModule}
-                isLoading={addModule.isPending || updateModule.isPending}
-                mode={moduleEditId ? 'edit' : 'create'}
-            />
-
-            <CreateContentDialog
-                isOpen={isContentModalOpen}
-                onOpenChange={(open) => {
-                    setIsContentModalOpen(open);
-                    if (!open) {
-                        setContentEditId(null);
-                        setContentData({ title: "", type: "VIDEO", url: "", projectId: "", duration: 0, attemptLimit: 0 });
-                    }
-                }}
-                contentData={contentData}
-                onContentDataChange={setContentData}
-                onSubmit={handleAddContent}
-                projects={projects || []}
-                isLoading={addContent.isPending || updateContent.isPending}
-                mode={contentEditId ? 'edit' : 'create'}
-            />
-        </div>
+        </RoleProtect>
     );
 }

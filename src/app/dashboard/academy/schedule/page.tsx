@@ -21,6 +21,9 @@ import { CreateActivityDialog } from "@/components/ui/custom-ui/dashboard-compon
 import { DesktopCalendar } from "@/components/ui/custom-ui/dashboard-components/schedule/DesktopCalendar";
 import { MobileWeeklyCalendar } from "@/components/ui/custom-ui/dashboard-components/schedule/MobileWeeklyCalendar";
 
+import { RoleProtect } from "@/components/providers/RoleProtect";
+import { Role } from "@/types/auth";
+
 export default function SchedulePage() {
     const colors = useThemeColors();
     const { data: students, isLoading: studentsLoading } = useStudents();
@@ -57,89 +60,91 @@ export default function SchedulePage() {
     };
 
     return (
-        <div className="p-6 space-y-6">
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                <h1 className="text-2xl md:text-3xl font-black text-gray-900 flex items-center gap-3">
-                    <div className={cn("p-3 rounded-xl bg-white shadow-sm border border-gray-100", colors.text)}>
-                        <CalendarDays className="w-8 h-8" />
+        <RoleProtect allowedRoles={[Role.TEACHER, Role.ADMIN]}>
+            <div className="p-6 space-y-6">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <h1 className="text-2xl md:text-3xl font-black text-gray-900 flex items-center gap-3">
+                        <div className={cn("p-3 rounded-xl bg-white shadow-sm border border-gray-100", colors.text)}>
+                            <CalendarDays className="w-8 h-8" />
+                        </div>
+                        Haftalık Program
+                    </h1>
+
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+                        <Select value={selectedStudentId} onValueChange={setSelectedStudentId}>
+                            <SelectTrigger className="w-full sm:w-[200px] bg-white border-gray-200">
+                                <SelectValue placeholder="Öğrenci Seçin" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {studentsLoading ? (
+                                    <div className="p-2 text-sm text-gray-500">Yükleniyor...</div>
+                                ) : students && students.length > 0 ? (
+                                    students.map((student) => (
+                                        <SelectItem key={student.id} value={student.id}>
+                                            {student.name}
+                                        </SelectItem>
+                                    ))
+                                ) : (
+                                    <div className="p-2 text-sm text-gray-500">Öğrenci bulunamadı</div>
+                                )}
+                            </SelectContent>
+                        </Select>
+
+                        <Button
+                            onClick={() => setIsCreateModalOpen(true)}
+                            className={cn("text-white shadow-lg shadow-indigo-500/20 active:scale-95 transition-all w-full sm:w-auto", colors.buttonBg, colors.buttonHover)}
+                            disabled={!selectedStudentId}
+                        >
+                            <Plus className="w-5 h-5 mr-2" />
+                            Yeni Ekle
+                        </Button>
                     </div>
-                    Haftalık Program
-                </h1>
-
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
-                    <Select value={selectedStudentId} onValueChange={setSelectedStudentId}>
-                        <SelectTrigger className="w-full sm:w-[200px] bg-white border-gray-200">
-                            <SelectValue placeholder="Öğrenci Seçin" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {studentsLoading ? (
-                                <div className="p-2 text-sm text-gray-500">Yükleniyor...</div>
-                            ) : students && students.length > 0 ? (
-                                students.map((student) => (
-                                    <SelectItem key={student.id} value={student.id}>
-                                        {student.name}
-                                    </SelectItem>
-                                ))
-                            ) : (
-                                <div className="p-2 text-sm text-gray-500">Öğrenci bulunamadı</div>
-                            )}
-                        </SelectContent>
-                    </Select>
-
-                    <Button
-                        onClick={() => setIsCreateModalOpen(true)}
-                        className={cn("text-white shadow-lg shadow-indigo-500/20 active:scale-95 transition-all w-full sm:w-auto", colors.buttonBg, colors.buttonHover)}
-                        disabled={!selectedStudentId}
-                    >
-                        <Plus className="w-5 h-5 mr-2" />
-                        Yeni Ekle
-                    </Button>
                 </div>
+
+                {!selectedStudentId ? (
+                    <div className="text-center py-12 bg-white rounded-2xl border border-gray-100 shadow-sm border-dashed">
+                        <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-gray-50", colors.text)}>
+                            <CalendarDays className="w-8 h-8 opacity-50" />
+                        </div>
+                        <h3 className="text-lg font-bold text-gray-900 mb-2">Öğrenci Seçilmedi</h3>
+                        <p className="text-gray-500 max-w-md mx-auto">
+                            Programı görüntülemek ve düzenlemek için lütfen yukarıdan bir öğrenci seçin.
+                        </p>
+                    </div>
+                ) : scheduleLoading ? (
+                    <div className="h-64 flex items-center justify-center">
+                        <div className="flex flex-col items-center gap-3">
+                            <div className={cn("w-8 h-8 border-4 border-t-transparent rounded-full animate-spin", colors.border)}></div>
+                            <span className="text-sm font-medium text-gray-500">Program yükleniyor...</span>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-lg overflow-hidden">
+                        <DesktopCalendar
+                            schedule={schedule}
+                            currentDate={currentDate}
+                            setCurrentDate={setCurrentDate}
+                            handleDelete={handleDelete}
+                            colors={colors}
+                        />
+
+                        <MobileWeeklyCalendar
+                            schedule={schedule}
+                            currentWeekDate={currentWeekDate}
+                            setCurrentWeekDate={setCurrentWeekDate}
+                            handleDelete={handleDelete}
+                            colors={colors}
+                        />
+                    </div>
+                )}
+
+                <CreateActivityDialog
+                    isOpen={isCreateModalOpen}
+                    onOpenChange={setIsCreateModalOpen}
+                    selectedStudentId={selectedStudentId}
+                    colors={colors}
+                />
             </div>
-
-            {!selectedStudentId ? (
-                <div className="text-center py-12 bg-white rounded-2xl border border-gray-100 shadow-sm border-dashed">
-                    <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-gray-50", colors.text)}>
-                        <CalendarDays className="w-8 h-8 opacity-50" />
-                    </div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">Öğrenci Seçilmedi</h3>
-                    <p className="text-gray-500 max-w-md mx-auto">
-                        Programı görüntülemek ve düzenlemek için lütfen yukarıdan bir öğrenci seçin.
-                    </p>
-                </div>
-            ) : scheduleLoading ? (
-                <div className="h-64 flex items-center justify-center">
-                    <div className="flex flex-col items-center gap-3">
-                        <div className={cn("w-8 h-8 border-4 border-t-transparent rounded-full animate-spin", colors.border)}></div>
-                        <span className="text-sm font-medium text-gray-500">Program yükleniyor...</span>
-                    </div>
-                </div>
-            ) : (
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-lg overflow-hidden">
-                    <DesktopCalendar
-                        schedule={schedule}
-                        currentDate={currentDate}
-                        setCurrentDate={setCurrentDate}
-                        handleDelete={handleDelete}
-                        colors={colors}
-                    />
-
-                    <MobileWeeklyCalendar
-                        schedule={schedule}
-                        currentWeekDate={currentWeekDate}
-                        setCurrentWeekDate={setCurrentWeekDate}
-                        handleDelete={handleDelete}
-                        colors={colors}
-                    />
-                </div>
-            )}
-
-            <CreateActivityDialog
-                isOpen={isCreateModalOpen}
-                onOpenChange={setIsCreateModalOpen}
-                selectedStudentId={selectedStudentId}
-                colors={colors}
-            />
-        </div>
+        </RoleProtect>
     );
 }
