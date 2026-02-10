@@ -34,8 +34,11 @@ export const PDFDocument = ({ questions, projectName, settings, userRole }: PDFT
       }
 
       const renderWidth = colCount === 1 ? COL_WIDTH_1 : COL_WIDTH_2;
-      const imgWidth = q.width || 800;
+
+      // Fallback for guest questions missing dimensions to prevent premature column jumps
+      const imgWidth = q.width || 1200;
       const imgHeight = q.height || 600;
+
       const renderHeight = (renderWidth / imgWidth) * imgHeight;
       const qSpacing = q.bottomSpacing || spacing;
       const qSpacingPt = qSpacing * 2.83;

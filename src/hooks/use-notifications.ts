@@ -28,7 +28,8 @@ export function useNotifications() {
                 unreadCount: typeof data?.unreadCount === 'number' ? data.unreadCount : (Array.isArray(data) ? data.filter((n: any) => !n.isRead).length : 0)
             };
         },
-        refetchInterval: 30000, // 30 saniyede bir kontrol et (Sunucu dostu)
+        refetchInterval: 30000,
+        enabled: typeof window !== 'undefined' && !!localStorage.getItem('accessToken')
     });
 
     const markAsRead = useMutation({

@@ -1,6 +1,6 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { getGuestProject, getGuestProjects, updateGuestProjectSettings, updateGuestProject } from "@/lib/guest-projects";
 
 export interface Project {
     id: string;
@@ -16,6 +16,12 @@ export function useProjects() {
     return useQuery({
         queryKey: ["projects"],
         queryFn: async () => {
+            // Check if user is logged in (via localStorage token check or similar)
+            // But here we can just try to fetch and if it fails or if we want to be explicit:
+            const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+            if (!token) {
+                return getGuestProjects() as Project[];
+            }
             const response = await api.get("/projects");
             return response.data.data as Project[];
         }
@@ -27,10 +33,16 @@ export function useProject(id: string) {
     return useQuery({
         queryKey: ["projects", id],
         queryFn: async () => {
+            console.log("🔍 useProject hook - ID:", id);
+            if (id.startsWith('guest_')) {
+                const guestProject = getGuestProject(id);
+                console.log("🔍 Guest Project Found:", guestProject);
+                return guestProject as Project;
+            }
             const response = await api.get(`/projects/${id}`);
             return response.data.data as Project;
         },
-        enabled: !!id && !id.startsWith('guest_')
+        enabled: !!id
     });
 }
 
@@ -83,11 +95,16 @@ export function useUpdateProject() {
 
     return useMutation({
         mutationFn: async ({ id, ...data }: { id: string, name?: string }) => {
+            if (id.startsWith('guest_')) {
+                updateGuestProject(id, data);
+                return { success: true, data };
+            }
             const response = await api.put(`/projects/${id}`, data);
             return response.data;
         },
-        onSuccess: () => {
+        onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: ["projects"] });
+            queryClient.invalidateQueries({ queryKey: ["projects", variables.id] });
         },
     });
 }
@@ -98,12 +115,17 @@ export function useUpdateProjectSettings() {
 
     return useMutation({
         mutationFn: async ({ id, settings }: { id: string, settings: any }) => {
+            if (id.startsWith('guest_')) {
+                updateGuestProjectSettings(id, settings);
+                return { success: true, data: settings };
+            }
             const response = await api.put(`/settings/${id}`, settings);
             return response.data;
         },
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: ["settings", variables.id] });
             queryClient.invalidateQueries({ queryKey: ["projects"] });
+            queryClient.invalidateQueries({ queryKey: ["projects", variables.id] });
         },
     });
 }

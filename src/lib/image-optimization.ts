@@ -20,3 +20,20 @@ export async function optimizeImage(file: File): Promise<File> {
         return file; // Hata durumunda orijinal dosyayı döndür
     }
 }
+
+export async function getImageDimensions(src: string | File): Promise<{ width: number, height: number }> {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+            resolve({ width: img.naturalWidth, height: img.naturalHeight });
+        };
+        img.onerror = () => {
+            resolve({ width: 800, height: 600 }); // Fallback
+        };
+        if (typeof src === 'string') {
+            img.src = src;
+        } else {
+            img.src = URL.createObjectURL(src);
+        }
+    });
+}

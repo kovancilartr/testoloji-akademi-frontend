@@ -368,6 +368,8 @@ export function usePdfCropper(projectId: string, onQuestionAdded?: (question: an
                         imageUrl: base64,
                         difficulty: q.difficulty,
                         correctAnswer: q.correctAnswer,
+                        width: q.crop?.width || 800,
+                        height: q.crop?.height || 600,
                         createdAt: new Date().toISOString(),
                     };
 

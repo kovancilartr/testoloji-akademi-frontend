@@ -48,11 +48,11 @@ export function EditProjectDialog({
         try {
             // Guest project için localStorage'ı güncelle
             if (!user && project.id.startsWith('guest_')) {
-                const guestProjects = JSON.parse(localStorage.getItem('guestProjects') || '[]');
+                const guestProjects = JSON.parse(localStorage.getItem('testoloji_guest_projects') || '[]');
                 const updatedProjects = guestProjects.map((p: any) =>
                     p.id === project.id ? { ...p, name: projectName.trim(), updatedAt: new Date().toISOString() } : p
                 );
-                localStorage.setItem('guestProjects', JSON.stringify(updatedProjects));
+                localStorage.setItem('testoloji_guest_projects', JSON.stringify(updatedProjects));
 
                 // Custom event dispatch
                 window.dispatchEvent(new Event('guestProjectsUpdated'));

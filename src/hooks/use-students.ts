@@ -29,6 +29,7 @@ export function useStudents() {
             const response = await api.get("/academy/students");
             return response.data.data as Student[];
         },
+        enabled: typeof window !== 'undefined' && !!localStorage.getItem('accessToken')
     });
 }
 

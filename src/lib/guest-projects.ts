@@ -18,7 +18,18 @@ export function getGuestProjects(): GuestProject[] {
     if (typeof window === 'undefined') return [];
 
     try {
-        const data = localStorage.getItem(GUEST_PROJECTS_KEY);
+        let data = localStorage.getItem(GUEST_PROJECTS_KEY);
+
+        // Migration: Check for old key if new key doesn't exist
+        if (!data) {
+            const oldData = localStorage.getItem('guestProjects');
+            if (oldData) {
+                localStorage.setItem(GUEST_PROJECTS_KEY, oldData);
+                localStorage.removeItem('guestProjects');
+                data = oldData;
+            }
+        }
+
         return data ? JSON.parse(data) : [];
     } catch (e) {
         console.error('Failed to load guest projects:', e);

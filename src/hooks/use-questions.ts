@@ -171,12 +171,16 @@ export function useUploadQuestion() {
 
             if (isGuestProject) {
                 // Convert file to base64 for guest users
-                return new Promise((resolve, reject) => {
+                return new Promise(async (resolve, reject) => {
                     const reader = new FileReader();
+                    const dimensions = await import('@/lib/image-optimization').then(m => m.getImageDimensions(file));
+
                     reader.onload = () => {
                         const base64 = reader.result as string;
                         const newQuestion = addGuestQuestion(projectId, {
                             imageUrl: base64,
+                            width: dimensions.width,
+                            height: dimensions.height,
                             createdAt: new Date().toISOString(),
                         });
                         resolve(newQuestion);
@@ -215,7 +219,10 @@ export function useBulkUploadQuestions() {
             if (isGuestProject) {
                 // Guest mode: convert to base64 and save to LocalStorage
                 const results = [];
+                const { getImageDimensions } = await import('@/lib/image-optimization');
+
                 for (const file of files) {
+                    const dimensions = await getImageDimensions(file);
                     const base64 = await new Promise<string>((resolve, reject) => {
                         const reader = new FileReader();
                         reader.onloadend = () => resolve(reader.result as string);
@@ -225,6 +232,8 @@ export function useBulkUploadQuestions() {
 
                     const newQuestion = addGuestQuestion(projectId, {
                         imageUrl: base64,
+                        width: dimensions.width,
+                        height: dimensions.height,
                         createdAt: new Date().toISOString(),
                     });
 
