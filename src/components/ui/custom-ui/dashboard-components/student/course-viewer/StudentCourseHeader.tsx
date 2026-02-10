@@ -27,7 +27,7 @@ export function StudentCourseHeader({
             <div className="flex items-center gap-4 md:gap-6 min-w-0">
                 <Button
                     variant="ghost"
-                    className="text-slate-500 hover:text-orange-500 gap-2 p-2 h-10 rounded-xl transition-all"
+                    className="text-slate-500 hover:text-orange-500 gap-2 p-2 h-10 rounded-xl transition-all cursor-pointer"
                     onClick={onBack}
                 >
                     <ChevronLeft className="w-5 h-5" />
@@ -61,7 +61,7 @@ export function StudentCourseHeader({
                 <Button
                     variant="outline"
                     size="icon"
-                    className={cn("hidden md:flex rounded-xl border-slate-200 transition-all", isSidebarOpen && "bg-slate-900 text-white border-slate-900 shadow-lg shadow-slate-200")}
+                    className={cn("cursor-pointer flex rounded-xl border-slate-200 transition-all", isSidebarOpen && "bg-slate-900 text-white border-slate-900 shadow-lg shadow-slate-200")}
                     onClick={onToggleSidebar}
                 >
                     <LayoutGrid className="w-4 h-4" />

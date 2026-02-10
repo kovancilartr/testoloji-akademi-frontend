@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import {
     ChevronDown, ChevronUp, Video, ClipboardList, BookOpen,
@@ -32,6 +33,8 @@ export function CourseSidebar({
     isCinemaMode
 }: CourseSidebarProps) {
 
+    const activeContent = allContents.find(c => c.id === selectedContentId);
+
     if (isCinemaMode) return null;
 
     return (
@@ -39,23 +42,40 @@ export function CourseSidebar({
             {/* Sidebar Overlay (Mobile) */}
             {isSidebarOpen && (
                 <div
-                    className="lg:hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[35] animate-in fade-in duration-300"
+                    className="lg:hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[110] animate-in fade-in duration-300"
                     onClick={onClose}
                 />
             )}
 
             {/* Sidebar */}
             <div className={cn(
-                "fixed lg:relative inset-y-0 left-0 bg-white border-r border-slate-100 flex flex-col transition-all duration-500 ease-in-out z-40 shadow-2xl lg:shadow-none",
+                "fixed lg:relative inset-y-0 left-0 bg-white border-r border-slate-100 flex flex-col transition-all duration-500 ease-in-out z-[120] lg:z-40 shadow-2xl lg:shadow-none",
                 isSidebarOpen ? "w-[85vw] sm:w-[350px] lg:w-[380px]" : "w-0 -translate-x-full lg:translate-x-0 overflow-hidden border-none"
             )}>
                 <div className="flex flex-col h-full w-full">
-                    <div className="p-6 md:p-8 bg-slate-50/50 border-b border-slate-200">
-                        <div className="flex items-center justify-between">
-                            <h3 className="text-slate-900 font-black text-lg tracking-tight">Ders İçeriği</h3>
-                            <Button variant="ghost" size="icon" className="lg:hidden" onClick={onClose}><X className="w-5 h-5" /></Button>
+                    <div className="p-6 md:p-4 bg-slate-50/50 border-b border-slate-200">
+                        <div className="flex items-start justify-between gap-4">
+                            <div className="space-y-1">
+                                {/* Mobile: Show Course Title */}
+                                <h3 className="lg:hidden text-slate-900 font-black text-lg leading-tight">{course.title}</h3>
+                                {/* Desktop: Show Generic Title */}
+                                <h3 className="hidden lg:block text-slate-900 font-black text-lg tracking-tight">Ders İçeriği</h3>
+
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    {activeContent && (
+                                        <Badge variant="secondary" className="lg:hidden text-[10px] font-black bg-orange-100 text-orange-700 hover:bg-orange-200 border-none px-1.5 py-0 h-5">
+                                            {activeContent.type}
+                                        </Badge>
+                                    )}
+                                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest leading-none">
+                                        {course.modules.length} BÖLÜM • {allContents.length} DERS
+                                    </p>
+                                </div>
+                            </div>
+                            <Button variant="ghost" size="icon" className="lg:hidden shrink-0 -mr-2 -mt-2" onClick={onClose}>
+                                <X className="w-5 h-5 text-slate-400" />
+                            </Button>
                         </div>
-                        <p className="text-slate-400 text-[10px] font-bold mt-1 uppercase tracking-widest leading-none">{course.modules.length} BÖLÜM • {allContents.length} DERS</p>
                     </div>
 
                     <ScrollArea className="flex-1 custom-scrollbar scroll-smooth">

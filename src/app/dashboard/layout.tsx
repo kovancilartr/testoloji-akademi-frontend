@@ -5,11 +5,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import { usePathname } from "next/navigation";
 import { FullPageLoader } from "@/components/ui/custom-ui/FullPageLoader";
 import { AppSidebar } from "@/components/layout/AppSidebar";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Menu, GraduationCap } from "lucide-react";
 import { ForcePasswordChangeModal } from "@/components/ui/custom-ui/auth/ForcePasswordChangeModal";
 import { NotificationPopover } from "@/components/ui/custom-ui/dashboard-components/NotificationPopover";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 export default function DashboardLayout({
     children,
@@ -55,7 +56,10 @@ export default function DashboardLayout({
                                     </Button>
                                 </SheetTrigger>
                                 <SheetContent side="left" className="p-0 w-[280px] border-r-0">
-                                    <AppSidebar className="w-full h-full border-none" />
+                                    <VisuallyHidden>
+                                        <SheetTitle>Mobil Menü</SheetTitle>
+                                    </VisuallyHidden>
+                                    <AppSidebar className="w-full h-full border-none" userDropdownSide="top" />
                                 </SheetContent>
                             </Sheet>
                         </div>

@@ -1,6 +1,6 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { toast } from "sonner";
 
 export interface Course {
     id: string;
@@ -250,7 +250,42 @@ export function useUpdateProgress() {
             const response = await api.post(`/courses/my-courses/${courseId}/progress/${contentId}`, { status });
             return response.data.data;
         },
-        onSuccess: (_, variables) => {
+        onMutate: async ({ courseId, contentId, status }) => {
+            // Cancel outgoing refetches to avoid overwriting optimistic update
+            await queryClient.cancelQueries({ queryKey: ["my-courses", courseId] });
+
+            // Snapshot previous value
+            const previousCourse = queryClient.getQueryData(["my-courses", courseId]);
+
+            // Optimistically update
+            queryClient.setQueryData(["my-courses", courseId], (old: any) => {
+                if (!old) return old;
+
+                const newModules = old.modules.map((m: any) => ({
+                    ...m,
+                    contents: m.contents.map((c: any) => {
+                        if (c.id === contentId) {
+                            return {
+                                ...c,
+                                progress: [{ status, updatedAt: new Date().toISOString() }]
+                            };
+                        }
+                        return c;
+                    })
+                }));
+
+                return { ...old, modules: newModules };
+            });
+
+            return { previousCourse };
+        },
+        onError: (err, variables, context: any) => {
+            if (context?.previousCourse) {
+                queryClient.setQueryData(["my-courses", variables.courseId], context.previousCourse);
+            }
+            toast.error("İlerleme kaydedilirken bir hata oluştu. Lütfen tekrar deneyin.");
+        },
+        onSettled: (data, error, variables) => {
             queryClient.invalidateQueries({ queryKey: ["my-courses", variables.courseId] });
         },
     });

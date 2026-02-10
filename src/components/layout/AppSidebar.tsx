@@ -29,9 +29,10 @@ import { NotificationPopover } from "@/components/ui/custom-ui/dashboard-compone
 
 interface SidebarProps {
     className?: string;
+    userDropdownSide?: "top" | "bottom" | "left" | "right";
 }
 
-export function AppSidebar({ className }: SidebarProps) {
+export function AppSidebar({ className, userDropdownSide = "right" }: SidebarProps) {
     const pathname = usePathname();
     const { user, logout } = useAuth();
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -91,19 +92,14 @@ export function AppSidebar({ className }: SidebarProps) {
             title: "Akademi (Koçluk)",
             items: [
                 {
+                    label: "Kurslar",
+                    href: "/dashboard/academy/courses",
+                    icon: BookOpen,
+                },
+                {
                     label: "Öğrencilerim",
                     href: "/dashboard/academy/students",
                     icon: Users,
-                },
-                {
-                    label: "Öğrenci Analizleri",
-                    href: "/dashboard/academy/analytics",
-                    icon: TrendingUp,
-                },
-                {
-                    label: "Kurslar & Müfredat",
-                    href: "/dashboard/academy/courses",
-                    icon: BookOpen,
                 },
                 {
                     label: "Ders Programı",
@@ -115,6 +111,12 @@ export function AppSidebar({ className }: SidebarProps) {
                     href: "/dashboard/academy/assignments",
                     icon: BookOpenCheck,
                 },
+                {
+                    label: "Öğrenci Analizleri",
+                    href: "/dashboard/academy/analytics",
+                    icon: TrendingUp,
+                },
+
             ],
         },
     ];
@@ -228,7 +230,7 @@ export function AppSidebar({ className }: SidebarProps) {
             )}>
                 <NotificationPopover side="right" align="end" />
                 <UserDropdown
-                    side="right"
+                    side={userDropdownSide}
                     align="end"
                     trigger={
                         <div className={cn("flex w-full items-center gap-3 p-2 rounded-xl border border-gray-200 bg-white cursor-pointer hover:bg-gray-50 transition-colors group", isCollapsed && "justify-center border-none p-0 bg-transparent")}>

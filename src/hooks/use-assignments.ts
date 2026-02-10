@@ -78,3 +78,35 @@ export function useDeleteAssignment() {
         },
     });
 }
+
+// Ödev Tamamla / Gönder
+export function useSubmitAssignment() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({ id, answers }: { id: string; answers?: Record<string, any> }) => {
+            const response = await api.post(`/assignments/${id}/submit`, { answers: answers || {} });
+            return response.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["assignments"] });
+            queryClient.invalidateQueries({ queryKey: ["students"] });
+        },
+    });
+}
+
+// Ödev İşaretini Geri Al
+export function useUndoSubmitAssignment() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (id: string) => {
+            const response = await api.post(`/assignments/${id}/undo-submit`);
+            return response.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["assignments"] });
+            queryClient.invalidateQueries({ queryKey: ["students"] });
+        },
+    });
+}

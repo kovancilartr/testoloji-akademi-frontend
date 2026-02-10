@@ -32,6 +32,9 @@ export default function AdminUsersPage() {
     const deleteUser = useDeleteUser();
 
     const [searchTerm, setSearchTerm] = useState("");
+    const [roleFilter, setRoleFilter] = useState<string>("ALL");
+    const [tierFilter, setTierFilter] = useState<string>("ALL");
+
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [userToDelete, setUserToDelete] = useState<{ id: string, name: string | null, email: string } | null>(null);
 
@@ -47,10 +50,15 @@ export default function AdminUsersPage() {
         return <UnauthorizedAccess />;
     }
 
-    const filteredUsers = users.filter((u: any) =>
-        u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (u.name && u.name.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+    const filteredUsers = users.filter((u: any) => {
+        const matchesSearch = u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (u.name && u.name.toLowerCase().includes(searchTerm.toLowerCase()));
+
+        const matchesRole = roleFilter === "ALL" || u.role === roleFilter;
+        const matchesTier = tierFilter === "ALL" || u.tier === tierFilter;
+
+        return matchesSearch && matchesRole && matchesTier;
+    });
 
     const handleDeleteClick = (user: any) => {
         setUserToDelete(user);
@@ -111,6 +119,10 @@ export default function AdminUsersPage() {
                 <AdminHeader
                     searchTerm={searchTerm}
                     onSearchChange={setSearchTerm}
+                    roleFilter={roleFilter}
+                    onRoleFilterChange={setRoleFilter}
+                    tierFilter={tierFilter}
+                    onTierFilterChange={setTierFilter}
                 />
 
                 <AdminStatsBar stats={stats} />

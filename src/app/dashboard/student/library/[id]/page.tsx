@@ -93,14 +93,24 @@ export default function StudentCourseViewerPage({ params }: { params: Promise<{ 
         }
     }, [course, initialContentId]);
 
-    const handleMarkAsCompleted = async (contentId: string) => {
-        try {
-            await updateProgress.mutateAsync({ courseId: id, contentId, status: 'COMPLETED' });
-            toast.success("Tebrikler, bu dersi tamamladın!");
-            nextContent();
-        } catch (error) {
-            toast.error("İlerleme kaydedilemedi.");
+    // Auto-mark as IN_PROGRESS when starting
+    useEffect(() => {
+        if (activeContent && (!activeContent.progress || activeContent.progress.length === 0 || activeContent.progress[0]?.status === 'NOT_STARTED')) {
+            updateProgress.mutate({ courseId: id, contentId: activeContent.id, status: 'IN_PROGRESS' });
         }
+    }, [activeContent?.id]);
+
+    const handleMarkAsCompleted = (contentId: string) => {
+        // Optimistic: Update immediately
+        updateProgress.mutate({ courseId: id, contentId, status: 'COMPLETED' });
+        toast.success("Tebrikler, bu dersi tamamladın!");
+        nextContent();
+    };
+
+    const handleUndoCompletion = (contentId: string) => {
+        // Optimistic: Update immediately
+        updateProgress.mutate({ courseId: id, contentId, status: 'IN_PROGRESS' });
+        toast.success("Ders tamamlanmadı olarak işaretlendi.");
     };
 
     const handleStartExam = async () => {
@@ -182,6 +192,7 @@ export default function StudentCourseViewerPage({ params }: { params: Promise<{ 
                     onNext={nextContent}
                     onPrev={prevContent}
                     onComplete={handleMarkAsCompleted}
+                    onUndoComplete={handleUndoCompletion}
                     isCompleting={updateProgress.isPending}
                     hasPrev={activeIndex > 0}
                     hasNext={activeIndex < allContents.length - 1}
