@@ -13,7 +13,7 @@ const CtaSection = () => {
                     Modern Eğitim Yolculuğuna <span className="text-brand-500 underline decoration-8 decoration-brand-500/20 underline-offset-8">Bugün Başlayın.</span>
                 </h2>
                 <p className="text-xl text-gray-400 font-medium max-w-2xl mx-auto z-10 relative leading-relaxed">
-                    Yüzlerce kurum ve binlerce eğitmen eğitim süreçlerini Testoloji Akademi ile dijitalleştiriyor. Hemen ücretsiz hesabınızı oluşturun.
+                    Yüzlerce kurum ve binlerce eğitmen eğitim süreçlerini Testoloji ile dijitalleştiriyor. Hemen ücretsiz hesabınızı oluşturun.
                 </p>
                 <div className="z-10 relative pt-4">
                     <Link href="/auth/register">

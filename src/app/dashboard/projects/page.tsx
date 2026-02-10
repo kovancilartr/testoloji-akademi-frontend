@@ -144,7 +144,7 @@ export default function DashboardPage() {
                         setIsSelectionMode={handleSelectionModeToggle}
                     />
 
-                    <ProjectStats projects={projects} userRole={user?.role || Role.STUDENT} />
+                    <ProjectStats projects={projects} userRole={user?.role} isGuest={!user} />
                 </div>
 
                 {/* Projects Grid */}

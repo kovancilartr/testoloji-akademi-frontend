@@ -30,6 +30,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useTeacherAnalytics } from "@/hooks/use-analytics";
 import { cn } from "@/lib/utils";
 import { useThemeColors } from "@/contexts/ThemeContext";
+import { ROLE_PROJECT_LIMITS } from "@/config/limits";
 
 export default function TeacherDashboard() {
     const { user } = useAuth();
@@ -37,6 +38,7 @@ export default function TeacherDashboard() {
     const { data: stats, isLoading } = useTeacherStats();
     const { data: teacherAnalytics } = useTeacherAnalytics();
     const colors = useThemeColors();
+    const hasCoaching = user?.hasCoachingAccess;
 
     const statCards = [
         {
@@ -46,27 +48,29 @@ export default function TeacherDashboard() {
             description: "Oluşturduğunuz testler",
             link: "/dashboard/projects"
         },
-        {
-            title: "Aktif Öğrenciler",
-            value: stats?.totalStudents ?? 0,
-            icon: Users,
-            description: "Sınıfınızdaki öğrenciler",
-            link: "/dashboard/academy/students"
-        },
-        {
-            title: "Sistem Kursları",
-            value: stats?.totalCourses ?? 0,
-            icon: BookOpen,
-            description: "Yayınladığınız kurslar",
-            link: "/dashboard/academy/courses"
-        },
-        {
-            title: "Bekleyen Ödevler",
-            value: stats?.totalAssignments ?? 0,
-            icon: Calendar,
-            description: "Kontrol edilecekler",
-            link: "/dashboard/academy/assignments"
-        }
+        ...(hasCoaching ? [
+            {
+                title: "Aktif Öğrenciler",
+                value: stats?.totalStudents ?? 0,
+                icon: Users,
+                description: "Sınıfınızdaki öğrenciler",
+                link: "/dashboard/academy/students"
+            },
+            {
+                title: "Sistem Kursları",
+                value: stats?.totalCourses ?? 0,
+                icon: BookOpen,
+                description: "Yayınladığınız kurslar",
+                link: "/dashboard/academy/courses"
+            },
+            {
+                title: "Bekleyen Ödevler",
+                value: stats?.totalAssignments ?? 0,
+                icon: Calendar,
+                description: "Kontrol edilecekler",
+                link: "/dashboard/academy/assignments"
+            }
+        ] : [])
     ];
 
     const quickActions = [
@@ -77,33 +81,35 @@ export default function TeacherDashboard() {
             link: "/dashboard/projects",
             gradient: true
         },
-        {
-            title: "Öğrenci Yönetimi",
-            description: "Öğrencilerinizin ödev takibini yapın ve gelişim raporlarını anlık olarak izleyin.",
-            icon: Users,
-            link: "/dashboard/academy/students",
-            iconBg: "bg-blue-50",
-            iconColor: "text-blue-600"
-        },
-        {
-            title: "Ders Programı",
-            description: "Öğrencileriniz için haftalık çalışma programı oluşturun ve takip edin.",
-            icon: CalendarDays,
-            link: "/dashboard/academy/schedule",
-            iconBg: "bg-purple-50",
-            iconColor: "text-purple-600"
-        },
-        {
-            title: "Kurs Yönetimi",
-            description: "Eğitim içeriklerinizi düzenleyin ve öğrencilerinizle paylaşın.",
-            icon: BookMarked,
-            link: "/dashboard/academy/courses",
-            iconBg: "bg-emerald-50",
-            iconColor: "text-emerald-600"
-        }
+        ...(hasCoaching ? [
+            {
+                title: "Öğrenci Yönetimi",
+                description: "Öğrencilerinizin ödev takibini yapın ve gelişim raporlarını anlık olarak izleyin.",
+                icon: Users,
+                link: "/dashboard/academy/students",
+                iconBg: "bg-blue-50",
+                iconColor: "text-blue-600"
+            },
+            {
+                title: "Ders Programı",
+                description: "Öğrencileriniz için haftalık çalışma programı oluşturun ve takip edin.",
+                icon: CalendarDays,
+                link: "/dashboard/academy/schedule",
+                iconBg: "bg-purple-50",
+                iconColor: "text-purple-600"
+            },
+            {
+                title: "Kurs Yönetimi",
+                description: "Eğitim içeriklerinizi düzenleyin ve öğrencilerinizle paylaşın.",
+                icon: BookMarked,
+                link: "/dashboard/academy/courses",
+                iconBg: "bg-emerald-50",
+                iconColor: "text-emerald-600"
+            }
+        ] : [])
     ];
 
-    const recentActivities = [
+    const recentActivities = hasCoaching ? [
         {
             title: "Son Eklenen Öğrenci",
             value: "Bugün 2 yeni öğrenci",
@@ -122,7 +128,7 @@ export default function TeacherDashboard() {
             icon: BookOpen,
             time: "1 gün önce"
         }
-    ];
+    ] : [];
 
     return (
         <div className="flex-1 p-8 overflow-y-auto space-y-8 custom-scrollbar bg-gradient-to-br from-gray-50 via-white to-gray-50/50 min-h-full">
@@ -138,14 +144,16 @@ export default function TeacherDashboard() {
                     </p>
                 </div>
                 <div className="flex gap-3">
-                    <Button
-                        onClick={() => router.push("/dashboard/academy/analytics")}
-                        variant="outline"
-                        className="h-12 px-6 rounded-xl font-bold border-gray-200 hover:bg-white"
-                    >
-                        <BarChart3 className="w-4 h-4 mr-2" />
-                        Analizler
-                    </Button>
+                    {hasCoaching && (
+                        <Button
+                            onClick={() => router.push("/dashboard/academy/analytics")}
+                            variant="outline"
+                            className="h-12 px-6 rounded-xl font-bold border-gray-200 hover:bg-white"
+                        >
+                            <BarChart3 className="w-4 h-4 mr-2" />
+                            Analizler
+                        </Button>
+                    )}
                     <Button
                         onClick={() => router.push("/dashboard/projects")}
                         className={cn("shadow-xl h-12 px-8 font-black text-base transition-all hover:scale-105 active:scale-95 group rounded-xl text-white", colors.buttonBg, colors.buttonHover, colors.shadow)}
@@ -190,116 +198,190 @@ export default function TeacherDashboard() {
                 )}
             </div>
 
-            {/* Hızlı İşlemler */}
-            <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                    <h3 className="text-2xl font-black text-gray-900">Hızlı İşlemler</h3>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                    {quickActions.map((action, idx) => (
-                        <Link key={idx} href={action.link} className="group">
-                            <div className={cn(
-                                "p-6 rounded-2xl shadow-lg group-hover:scale-[1.02] transition-all relative overflow-hidden h-full",
-                                action.gradient
-                                    ? cn("bg-gradient-to-br text-white", colors.gradient, colors.shadow)
-                                    : "bg-white border border-gray-100 shadow-sm"
-                            )}>
-                                <action.icon className={cn(
-                                    "absolute -bottom-4 -right-4 w-24 h-24 opacity-10 group-hover:rotate-12 transition-transform",
-                                    !action.gradient && "text-gray-200"
-                                )} />
-                                <div className="relative z-10">
+            {/* Conditional Layout based on Coaching Access */}
+            {hasCoaching ? (
+                <>
+                    {/* Hızlı İşlemler - Full Width for Coaching Users */}
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-2xl font-black text-gray-900">Hızlı İşlemler</h3>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                            {quickActions.map((action, idx) => (
+                                <Link key={idx} href={action.link} className="group">
                                     <div className={cn(
-                                        "w-12 h-12 rounded-xl flex items-center justify-center mb-4",
+                                        "p-6 rounded-2xl shadow-lg group-hover:scale-[1.02] transition-all relative overflow-hidden h-full",
                                         action.gradient
-                                            ? "bg-white/20 backdrop-blur-md text-white"
-                                            : cn(action.iconBg, action.iconColor)
+                                            ? cn("bg-gradient-to-br text-white", colors.gradient, colors.shadow)
+                                            : "bg-white border border-gray-100 shadow-sm"
                                     )}>
-                                        <action.icon className="w-6 h-6" />
+                                        <action.icon className={cn(
+                                            "absolute -bottom-4 -right-4 w-24 h-24 opacity-10 group-hover:rotate-12 transition-transform",
+                                            !action.gradient && "text-gray-200"
+                                        )} />
+                                        <div className="relative z-10">
+                                            <div className={cn(
+                                                "w-12 h-12 rounded-xl flex items-center justify-center mb-4",
+                                                action.gradient
+                                                    ? "bg-white/20 backdrop-blur-md text-white"
+                                                    : cn(action.iconBg, action.iconColor)
+                                            )}>
+                                                <action.icon className="w-6 h-6" />
+                                            </div>
+                                            <h4 className={cn(
+                                                "text-lg font-black mb-2",
+                                                action.gradient ? "text-white" : "text-gray-900"
+                                            )}>{action.title}</h4>
+                                            <p className={cn(
+                                                "text-xs font-medium leading-relaxed line-clamp-2",
+                                                action.gradient ? "text-white/80" : "text-gray-500"
+                                            )}>
+                                                {action.description}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <h4 className={cn(
-                                        "text-lg font-black mb-2",
-                                        action.gradient ? "text-white" : "text-gray-900"
-                                    )}>{action.title}</h4>
-                                    <p className={cn(
-                                        "text-xs font-medium leading-relaxed line-clamp-2",
-                                        action.gradient ? "text-white/80" : "text-gray-500"
-                                    )}>
-                                        {action.description}
-                                    </p>
-                                </div>
-                            </div>
-                        </Link>
-                    ))}
-                </div>
-            </div>
-
-            {/* Alt Bölüm: Son Aktiviteler & Hesap Özeti */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Son Aktiviteler */}
-                <div className="lg:col-span-2 space-y-4">
-                    <h3 className="text-2xl font-black text-gray-900">Son Aktiviteler</h3>
-                    <div className="space-y-3">
-                        {recentActivities.map((activity, idx) => (
-                            <Card key={idx} className="border-gray-100 shadow-sm hover:shadow-md transition-all rounded-xl">
-                                <CardContent className="p-4 flex items-center gap-4">
-                                    <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center", colors.iconBg)}>
-                                        <activity.icon className={cn("w-5 h-5", colors.text)} />
-                                    </div>
-                                    <div className="flex-1">
-                                        <h4 className="font-bold text-gray-900 text-sm">{activity.title}</h4>
-                                        <p className="text-xs text-gray-500">{activity.value}</p>
-                                    </div>
-                                    <div className="text-xs text-gray-400 font-medium flex items-center gap-1">
-                                        <Clock className="w-3 h-3" />
-                                        {activity.time}
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))}
+                                </Link>
+                            ))}
+                        </div>
                     </div>
-                    <Button
-                        variant="outline"
-                        className="w-full rounded-xl font-bold border-gray-200 hover:bg-white"
-                        onClick={() => router.push("/dashboard/academy/analytics")}
-                    >
-                        Tüm Aktiviteleri Gör
-                        <ChevronRight className="w-4 h-4 ml-2" />
-                    </Button>
-                </div>
 
-                {/* Hesap Özeti */}
-                <div className="space-y-4">
-                    <h3 className="text-2xl font-black text-gray-900">Hesap Özeti</h3>
-                    <Card className="border-none bg-gray-900 rounded-2xl overflow-hidden relative shadow-xl">
-                        <div className={cn("absolute top-0 right-0 w-48 h-48 blur-[80px] opacity-20 -mr-20 -mt-20 rounded-full", colors.gradient)}></div>
-                        <CardHeader className="p-6 pb-0 relative z-10">
-                            <Badge className={cn("w-fit text-white border-0 font-black text-[10px] px-3 py-1 rounded-full mb-4", colors.buttonBg, `hover:${colors.buttonBg}`)}>
-                                {user?.tier || "BRONZ"} PAKET
-                            </Badge>
-                            <CardTitle className="text-white text-2xl font-black">Testoloji Plus</CardTitle>
-                            <CardDescription className="text-gray-400 font-medium mt-2">
-                                Paket limitleriniz ve aktif özellikleriniz burada gösterilir.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="p-6 pt-4 relative z-10">
-                            <div className="space-y-4 mb-6">
-                                <div className="flex justify-between items-center text-sm">
-                                    <span className="text-gray-400 font-bold tracking-tight">Proje Limiti</span>
-                                    <span className="text-white font-black">{stats?.totalProjects ?? 0} / Sınırsız</span>
-                                </div>
-                                <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-                                    <div className={cn("h-full rounded-full", colors.buttonBg)} style={{ width: '30%' }}></div>
-                                </div>
+                    {/* Alt Bölüm: Son Aktiviteler & Hesap Özeti */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        {/* Son Aktiviteler */}
+                        <div className="lg:col-span-2 space-y-4">
+                            <h3 className="text-2xl font-black text-gray-900">Son Aktiviteler</h3>
+                            <div className="space-y-3">
+                                {recentActivities.map((activity, idx) => (
+                                    <Card key={idx} className="border-gray-100 shadow-sm hover:shadow-md transition-all rounded-xl">
+                                        <CardContent className="p-4 flex items-center gap-4">
+                                            <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center", colors.iconBg)}>
+                                                <activity.icon className={cn("w-5 h-5", colors.text)} />
+                                            </div>
+                                            <div className="flex-1">
+                                                <h4 className="font-bold text-gray-900 text-sm">{activity.title}</h4>
+                                                <p className="text-xs text-gray-500">{activity.value}</p>
+                                            </div>
+                                            <div className="text-xs text-gray-400 font-medium flex items-center gap-1">
+                                                <Clock className="w-3 h-3" />
+                                                {activity.time}
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                ))}
                             </div>
-                            <Button className="w-full h-11 rounded-xl bg-white text-gray-900 hover:bg-gray-100 font-black tracking-tight transition-all active:scale-95">
-                                Paketi Yükselt
+                            <Button
+                                variant="outline"
+                                className="w-full rounded-xl font-bold border-gray-200 hover:bg-white"
+                                onClick={() => router.push("/dashboard/academy/analytics")}
+                            >
+                                Tüm Aktiviteleri Gör
+                                <ChevronRight className="w-4 h-4 ml-2" />
                             </Button>
-                        </CardContent>
-                    </Card>
+                        </div>
+
+                        {/* Hesap Özeti */}
+                        <div className="space-y-4">
+                            <h3 className="text-2xl font-black text-gray-900">Hesap Özeti</h3>
+                            <div className="h-full">
+                                <AccountSummaryCard user={user} stats={stats} colors={colors} />
+                            </div>
+                        </div>
+                    </div>
+                </>
+            ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    {/* Hızlı İşlemler - Compact for Non-Coaching */}
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-2xl font-black text-gray-900">Hızlı İşlemler</h3>
+                        </div>
+                        <div className="grid grid-cols-1 gap-5">
+                            {quickActions.map((action, idx) => (
+                                <Link key={idx} href={action.link} className="group">
+                                    <div className={cn(
+                                        "p-6 rounded-2xl shadow-lg group-hover:scale-[1.02] transition-all relative overflow-hidden h-full",
+                                        action.gradient
+                                            ? cn("bg-gradient-to-br text-white", colors.gradient, colors.shadow)
+                                            : "bg-white border border-gray-100 shadow-sm"
+                                    )}>
+                                        <action.icon className={cn(
+                                            "absolute -bottom-4 -right-4 w-24 h-24 opacity-10 group-hover:rotate-12 transition-transform",
+                                            !action.gradient && "text-gray-200"
+                                        )} />
+                                        <div className="relative z-10">
+                                            <div className={cn(
+                                                "w-12 h-12 rounded-xl flex items-center justify-center mb-4",
+                                                action.gradient
+                                                    ? "bg-white/20 backdrop-blur-md text-white"
+                                                    : cn(action.iconBg, action.iconColor)
+                                            )}>
+                                                <action.icon className="w-6 h-6" />
+                                            </div>
+                                            <h4 className={cn(
+                                                "text-lg font-black mb-2",
+                                                action.gradient ? "text-white" : "text-gray-900"
+                                            )}>{action.title}</h4>
+                                            <p className={cn(
+                                                "text-xs font-medium leading-relaxed line-clamp-2",
+                                                action.gradient ? "text-white/80" : "text-gray-500"
+                                            )}>
+                                                {action.description}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Hesap Özeti - Side by Side */}
+                    <div className="space-y-4">
+                        <h3 className="text-2xl font-black text-gray-900">Hesap Özeti</h3>
+                        <AccountSummaryCard user={user} stats={stats} colors={colors} />
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 }
+
+const AccountSummaryCard = ({ user, stats, colors }: { user: any, stats: any, colors: any }) => {
+    return (
+        <Card className="border-none bg-gray-900 rounded-2xl overflow-hidden relative shadow-xl h-full min-h-[500px]">
+            <div className={cn("absolute top-0 right-0 w-48 h-48 blur-[80px] opacity-20 -mr-20 -mt-20 rounded-full", colors.gradient)}></div>
+            <CardHeader className="p-6 pb-0 relative z-10">
+                <Badge className={cn("w-fit text-white border-0 font-black text-[10px] px-3 py-1 rounded-full mb-4", colors.buttonBg, `hover:${colors.buttonBg}`)}>
+                    {user?.tier || "BRONZ"} PAKET
+                </Badge>
+                <CardTitle className="text-white text-2xl font-black">Testoloji Plus</CardTitle>
+                <CardDescription className="text-gray-400 font-medium mt-2">
+                    Paket limitleriniz ve aktif özellikleriniz burada gösterilir.
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="p-6 pt-4 relative z-10">
+                <div className="space-y-4 mb-6">
+                    <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-400 font-bold tracking-tight">Proje Limiti</span>
+                        <span className="text-white font-black">{stats?.totalProjects ?? 0} / {ROLE_PROJECT_LIMITS.TEACHER}</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                        <div className={cn("h-full rounded-full", colors.buttonBg)} style={{ width: '30%' }}></div>
+                    </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="bg-white/5 p-4 rounded-xl border border-white/10">
+                        <div className="text-gray-400 text-xs font-bold mb-1">Soru Hakkı</div>
+                        <div className="text-white font-black text-lg">Sınırsız</div>
+                    </div>
+                    <div className="bg-white/5 p-4 rounded-xl border border-white/10">
+                        <div className="text-gray-400 text-xs font-bold mb-1">Yapay Zeka</div>
+                        <div className="text-white font-black text-lg">Aktif</div>
+                    </div>
+                </div>
+                <Button className="w-full h-11 rounded-xl bg-white text-gray-900 hover:bg-gray-100 font-black tracking-tight transition-all active:scale-95">
+                    Paketi Yükselt
+                </Button>
+            </CardContent>
+        </Card>
+    );
+};

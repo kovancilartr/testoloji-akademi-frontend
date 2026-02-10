@@ -11,6 +11,7 @@ Testoloji, hem modern bir **Soru Bankası/Dijitalleştirme** aracı hem de kapsa
 
 ### 🔐 Güvenlik & Yetkilendirme (RBAC)
 *   **Role-Based Access Control:** `ADMIN`, `TEACHER` ve `STUDENT` rolleri için tam ayrıştırılmış arayüz.
+*   **Coaching Access Control:** Eğitmenler için dinamik yetki yönetimi ve özel kod tabanlı koruma.
 *   **RoleProtect Wrapper:** Sayfa ve bileşen seviyesinde yetki kontrolü sağlayan gelişmiş koruma katmanı.
 *   **Client-Side Security:** Yetkisiz erişimlerde kullanıcıyı ana sayfaya yönlendiren veya bilgilendiren şık Unauthorized UI.
 
@@ -22,6 +23,7 @@ Testoloji, hem modern bir **Soru Bankası/Dijitalleştirme** aracı hem de kapsa
 
 ### 📊 Performans Laboratuvarı (Analytics)
 *   **Öğretmen Dashboard:** Sınıf ortalaması, aktif öğrenci sayısı ve gelişim trendlerini izleyin.
+*   **Dinamik Dashboard:** Koçluk yetkisine sahip olmayan öğretmenler için optimize edilmiş, sadeleşmiş merkezi dashboard tasarımı.
 *   **Detaylı Analiz:** Her öğrenci (Koçluk Sistemi) için Doğru, Yanlış ve Net (4Y 1D) takibi.
 *   **Görsel Grafikler:** `Recharts` ile desteklenen interaktif başarı dağılım grafikleri.
 
@@ -59,6 +61,7 @@ Testoloji, hem modern bir **Soru Bankası/Dijitalleştirme** aracı hem de kapsa
 2.  **Çevresel Değişkenleri Ayarlayın (.env.local):**
     ```env
     NEXT_PUBLIC_API_URL=http://localhost:4000
+    NEXT_PUBLIC_IS_DEVELOPMENT=true  # Hızlı giriş butonlarını aktif eder (Dev Mode)
     ```
 
 3.  **Geliştirme Sunucusunu Başlatın:**

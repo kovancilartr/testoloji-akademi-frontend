@@ -5,6 +5,7 @@ import { Button } from '../button'
 import { ArrowRight } from 'lucide-react'
 import { SystemGuideDialog } from './dashboard-components/SystemGuideDialog'
 import { UserDropdown } from './dashboard-components/UserDropdown'
+import { Role } from '@/types/auth'
 
 
 interface GlobalHeaderProps {
@@ -35,8 +36,8 @@ const GlobalHeader = ({ isAuthenticated }: GlobalHeaderProps) => {
 
                         <div className="flex items-center gap-4">
                             <Link href="/dashboard">
-                                <Button className="bg-brand-500 hover:bg-brand-600 text-white rounded-xl px-6 h-11 font-black shadow-xl shadow-brand-500/20 group">
-                                    {isAuthenticated ? 'Döküman Oluştur' : 'Hemen Dene'} <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                                <Button className="bg-brand-500 cursor-pointer hover:bg-brand-600 text-white rounded-xl px-6 h-11 font-black shadow-xl shadow-brand-500/20 group">
+                                    {isAuthenticated ? 'İçerik Merkezi' : 'Döküman Oluştur'} <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                                 </Button>
                             </Link>
 

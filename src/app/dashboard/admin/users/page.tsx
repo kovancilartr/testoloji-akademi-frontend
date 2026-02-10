@@ -7,7 +7,8 @@ import {
     useUserStats,
     useUpdateUserRole,
     useToggleUserStatus,
-    useDeleteUser
+    useDeleteUser,
+    useToggleCoachingAccess
 } from "@/hooks/use-users";
 import { useAuth } from "@/contexts/AuthContext";
 import { FullPageLoader } from "@/components/ui/custom-ui/FullPageLoader";
@@ -29,6 +30,7 @@ export default function AdminUsersPage() {
 
     const updateMutation = useUpdateUserRole();
     const toggleUserStatus = useToggleUserStatus();
+    const toggleCoachingAccess = useToggleCoachingAccess();
     const deleteUser = useDeleteUser();
 
     const [searchTerm, setSearchTerm] = useState("");
@@ -138,6 +140,13 @@ export default function AdminUsersPage() {
                         });
                     }}
                     onDeleteClick={handleDeleteClick}
+                    onToggleCoachingAccess={(userId, currentStatus) => {
+                        toggleCoachingAccess.mutate({ userId, hasAccess: !currentStatus }, {
+                            onSuccess: () => {
+                                toast.success(currentStatus ? "Koçluk yetkisi alındı" : "Koçluk yetkisi verildi");
+                            }
+                        });
+                    }}
                 />
             </div>
 

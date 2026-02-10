@@ -11,6 +11,7 @@ interface UserTableProps {
     onTierChange: (userId: string, tier: SubscriptionTier) => void;
     onToggleStatus: (userId: string) => void;
     onDeleteClick: (user: any) => void;
+    onToggleCoachingAccess: (userId: string, currentStatus: boolean) => void;
 }
 
 export const UserTable = ({
@@ -19,7 +20,8 @@ export const UserTable = ({
     onRoleChange,
     onTierChange,
     onToggleStatus,
-    onDeleteClick
+    onDeleteClick,
+    onToggleCoachingAccess
 }: UserTableProps) => {
     return (
         <div className="space-y-4">
@@ -53,6 +55,7 @@ export const UserTable = ({
                             onTierChange={onTierChange}
                             onToggleStatus={onToggleStatus}
                             onDeleteClick={onDeleteClick}
+                            onToggleCoachingAccess={onToggleCoachingAccess}
                         />
                     ))
                 )}

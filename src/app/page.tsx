@@ -28,7 +28,7 @@ export default function Home() {
         <HeroSection />
 
         {/* Stats */}
-        <StatsSection />
+        {/* <StatsSection /> */}
 
         {/* Features Section */}
         <FeaturesSection />

@@ -72,7 +72,7 @@ export function AppSidebar({ className, userDropdownSide = "right" }: SidebarPro
     ];
 
     // Öğretmen Menüsü
-    const teacherMenuItems = [
+    const teacherBaseMenu = [
         {
             title: "Öğretmen Paneli",
             items: [
@@ -82,44 +82,49 @@ export function AppSidebar({ className, userDropdownSide = "right" }: SidebarPro
                     icon: LayoutDashboard,
                 },
                 {
-                    label: "Dosyalarım & PDF",
+                    label: "Test Merkezi",
                     href: "/dashboard/projects",
                     icon: FolderOpen,
                 },
             ],
-        },
-        {
-            title: "Akademi (Koçluk)",
-            items: [
-                {
-                    label: "Kurslar",
-                    href: "/dashboard/academy/courses",
-                    icon: BookOpen,
-                },
-                {
-                    label: "Öğrencilerim",
-                    href: "/dashboard/academy/students",
-                    icon: Users,
-                },
-                {
-                    label: "Ders Programı",
-                    href: "/dashboard/academy/schedule",
-                    icon: CalendarDays,
-                },
-                {
-                    label: "Ödevler",
-                    href: "/dashboard/academy/assignments",
-                    icon: BookOpenCheck,
-                },
-                {
-                    label: "Öğrenci Analizleri",
-                    href: "/dashboard/academy/analytics",
-                    icon: TrendingUp,
-                },
-
-            ],
-        },
+        }
     ];
+
+    const teacherCoachingMenu = {
+        title: "Akademi (Koçluk)",
+        items: [
+            {
+                label: "Kurslar",
+                href: "/dashboard/academy/courses",
+                icon: BookOpen,
+            },
+            {
+                label: "Öğrencilerim",
+                href: "/dashboard/academy/students",
+                icon: Users,
+            },
+            {
+                label: "Ders Programı",
+                href: "/dashboard/academy/schedule",
+                icon: CalendarDays,
+            },
+            {
+                label: "Ödevler",
+                href: "/dashboard/academy/assignments",
+                icon: BookOpenCheck,
+            },
+            {
+                label: "Öğrenci Analizleri",
+                href: "/dashboard/academy/analytics",
+                icon: TrendingUp,
+            },
+
+        ],
+    };
+
+    const teacherMenuItems = user?.hasCoachingAccess
+        ? [...teacherBaseMenu, teacherCoachingMenu]
+        : teacherBaseMenu;
 
     // Öğrenci Menüsü
     const studentMenuItems = [
@@ -157,7 +162,21 @@ export function AppSidebar({ className, userDropdownSide = "right" }: SidebarPro
         },
     ];
 
-    const menuItems = isAdmin ? adminMenuItems : (isTeacher ? teacherMenuItems : studentMenuItems);
+    // Misafir Menüsü
+    const guestMenuItems = [
+        {
+            title: "Misafir Paneli",
+            items: [
+                {
+                    label: "Dosyalar & PDF",
+                    href: "/dashboard/projects",
+                    icon: FolderOpen,
+                },
+            ],
+        },
+    ];
+
+    const menuItems = isAdmin ? adminMenuItems : (isTeacher ? teacherMenuItems : (isStudent ? studentMenuItems : guestMenuItems));
 
     const toggleCollapse = () => setIsCollapsed(!isCollapsed);
 
@@ -181,8 +200,8 @@ export function AppSidebar({ className, userDropdownSide = "right" }: SidebarPro
                         />
                     </div>
                     {!isCollapsed && (
-                        <span className="font-black text-xl tracking-tighter text-gray-900 whitespace-nowrap">
-                            Testoloji Akademi
+                        <span className="font-black text-xl tracking-tighter text-gray-900 whitespace-nowrap uppercase">
+                            Testoloji
                         </span>
                     )}
                 </Link>
@@ -242,8 +261,8 @@ export function AppSidebar({ className, userDropdownSide = "right" }: SidebarPro
 
                             {!isCollapsed && (
                                 <div className="flex-1 overflow-hidden">
-                                    <p className="text-sm font-bold text-gray-900 truncate">{user?.name || "Kullanıcı"}</p>
-                                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest truncate">{user?.tier || "BRONZ"}</p>
+                                    <p className="text-sm font-bold text-gray-900 truncate">{user?.name || "Misafir Kullanıcı"}</p>
+                                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest truncate">{user?.tier || "ÜCRETSİZ"}</p>
                                 </div>
                             )}
 

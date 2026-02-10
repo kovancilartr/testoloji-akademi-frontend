@@ -25,7 +25,7 @@ export const DashboardSubHeader = ({
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-1">
             <div className="space-y-1">
                 <h1 className="text-3xl lg:text-4xl font-black tracking-tight text-gray-900 leading-none">
-                    PROJELERİM
+                    Test Merkezi
                 </h1>
                 <div className="flex items-center gap-2 mt-2">
                     <span className="text-[10px] font-black text-brand-600 bg-brand-50 px-2 py-0.5 rounded-full uppercase tracking-widest">
@@ -59,7 +59,7 @@ export const DashboardSubHeader = ({
                 <div className="flex items-center gap-3">
                     <Button
                         onClick={handleCreateClick}
-                        className="flex-1 sm:flex-none bg-brand-500 hover:bg-brand-600 text-white rounded-xl px-6 h-11 font-black shadow-lg shadow-brand-500/20 gap-2 text-xs group transition-all"
+                        className="flex-1 cursor-pointer sm:flex-none bg-brand-500 hover:bg-brand-600 text-white rounded-xl px-6 h-11 font-black shadow-lg shadow-brand-500/20 gap-2 text-xs group transition-all"
                     >
                         <Plus className="h-4 w-4 group-hover:rotate-90 transition-transform duration-500" />
                         <span>Yeni Proje</span>
@@ -68,7 +68,7 @@ export const DashboardSubHeader = ({
                     <Button
                         variant={isSelectionMode ? "default" : "outline"}
                         onClick={() => setIsSelectionMode(!isSelectionMode)}
-                        className={`flex-1 sm:flex-none rounded-xl px-4 h-11 font-black gap-2 text-xs transition-all ${isSelectionMode ? 'bg-gray-900 text-white hover:bg-gray-800 shadow-xl' : 'border-gray-100 text-gray-500 hover:bg-gray-50'}`}
+                        className={`flex-1 cursor-pointer sm:flex-none rounded-xl px-4 h-11 font-black gap-2 text-xs transition-all ${isSelectionMode ? 'bg-gray-900 text-white hover:bg-gray-800 shadow-xl' : 'border-gray-100 text-gray-500 hover:bg-gray-50'}`}
                     >
                         <Sparkles className={`h-4 w-4 ${isSelectionMode ? 'animate-pulse text-brand-400' : ''}`} />
                         <span>{isSelectionMode ? 'Seçimi Bitir' : 'Kitaplaştır'}</span>

@@ -1,4 +1,3 @@
-
 const StatsSection = () => {
     return (
         <section className="py-12 border-y border-gray-100">

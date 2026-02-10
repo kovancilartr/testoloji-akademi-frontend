@@ -92,3 +92,16 @@ export const useDeleteUser = () => {
         },
     });
 };
+
+export const useToggleCoachingAccess = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ userId, hasAccess }: { userId: string, hasAccess: boolean }) => {
+            const { data } = await api.patch(`/users/${userId}/coaching-access`, { hasCoachingAccess: hasAccess });
+            return data.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["users"] });
+        },
+    });
+};

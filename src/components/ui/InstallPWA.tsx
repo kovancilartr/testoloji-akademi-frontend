@@ -4,14 +4,22 @@ import React, { useEffect, useState } from "react";
 import { Download, Smartphone, X } from "lucide-react";
 import { Button } from "./button";
 
+const PWA_KEY = 'pwa_prompt_dismissed';
+
 export function InstallPWA() {
     const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
-        // Check local storage first
-        const isDismissed = localStorage.getItem('pwa_prompt_dismissed');
-        if (isDismissed === 'true') return;
+        // Check if running in standalone mode (already installed)
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            return;
+        }
+
+        // Check if user dismissed the prompt before
+        if (localStorage.getItem(PWA_KEY) === 'true') {
+            return;
+        }
 
         const handler = (e: any) => {
             // Prevent Chrome 67 and earlier from automatically showing the prompt
@@ -21,14 +29,19 @@ export function InstallPWA() {
             setIsVisible(true);
         };
 
-        window.addEventListener("beforeinstallprompt", handler);
-
-        // Check if already installed
-        if (window.matchMedia('(display-mode: standalone)').matches) {
+        const installHandler = () => {
+            // App was installed (either via our button or browser UI)
             setIsVisible(false);
-        }
+            localStorage.setItem(PWA_KEY, 'true');
+        };
 
-        return () => window.removeEventListener("beforeinstallprompt", handler);
+        window.addEventListener("beforeinstallprompt", handler);
+        window.addEventListener("appinstalled", installHandler);
+
+        return () => {
+            window.removeEventListener("beforeinstallprompt", handler);
+            window.removeEventListener("appinstalled", installHandler);
+        };
     }, []);
 
     const handleInstallClick = async () => {
@@ -43,19 +56,19 @@ export function InstallPWA() {
         if (outcome === 'accepted') {
             console.log('User accepted the install prompt');
             // If they installed, we don't need to show this again
-            localStorage.setItem('pwa_prompt_dismissed', 'true');
+            localStorage.setItem(PWA_KEY, 'true');
+            setIsVisible(false);
         } else {
             console.log('User dismissed the install prompt');
         }
 
         // We've used the prompt, and can't use it again
         setDeferredPrompt(null);
-        setIsVisible(false);
     };
 
     const handleDismiss = () => {
         setIsVisible(false);
-        localStorage.setItem('pwa_prompt_dismissed', 'true');
+        localStorage.setItem(PWA_KEY, 'true');
     };
 
     if (!isVisible) return null;

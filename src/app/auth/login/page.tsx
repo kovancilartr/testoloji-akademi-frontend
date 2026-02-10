@@ -1,6 +1,6 @@
 "use client";
 
-import { Mail, Lock, Loader2, Sparkles } from "lucide-react";
+import { Mail, Lock, Loader2, Sparkles, GraduationCap, BookOpen, Users, BarChart2, Video, BrainCircuit, FileText, CheckCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { ApiResponse, AuthResponse } from "@/types/auth";
 import { FullPageLoader } from "@/components/ui/custom-ui/FullPageLoader";
+import { cn } from "@/lib/utils";
 
 const loginSchema = z.object({
     email: z.string().email("Geçerli bir email adresi giriniz"),
@@ -21,10 +22,51 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
+const slides = [
+    {
+        id: "teacher",
+        title: "Eğitmenler İçin",
+        headline: "Dijital Okulunuzu Kurun",
+        description: "Testler hazırlayın, PDF kitaplar oluşturun ve öğrencilerinizi yapay zeka destekli koçluk sistemiyle takip edin.",
+        features: [
+            { icon: FileText, text: "Soru Bankası & PDF Oluşturma" },
+            { icon: Users, text: "Öğrenci Takibi & Analiz" },
+            { icon: BrainCircuit, text: "Yapay Zeka Destekli Koçluk" },
+        ],
+        image: "/images/teacher-bg.png",
+        color: "from-orange-900/80 to-red-900/80",
+        iconColor: "text-orange-400",
+        badge: "EĞİTMEN MODU"
+    },
+    {
+        id: "student",
+        title: "Öğrenciler İçin",
+        headline: "Hedeflerine Adım Adım Ulaş",
+        description: "Kişiselleştirilmiş çalışma programları, video dersler ve detaylı analizlerle eksiklerini gör, başarıya odaklan.",
+        features: [
+            { icon: BrainCircuit, text: "Online Koçluk & Planlama" },
+            { icon: Video, text: "Video Dersler & Kurslar" },
+            { icon: BarChart2, text: "Detaylı Gelişim Raporları" },
+        ],
+        image: "/images/student-bg.png",
+        color: "from-blue-900/80 to-indigo-900/80",
+        iconColor: "text-blue-400",
+        badge: "ÖĞRENCİ MODU"
+    }
+];
+
 export default function LoginPage() {
     const { login, isAuthenticated, isLoading } = useAuth();
     const [loading, setLoading] = useState(false);
+    const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
     const router = useRouter();
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentSlideIndex((prev) => (prev + 1) % slides.length);
+        }, 6000);
+        return () => clearInterval(interval);
+    }, []);
 
     useEffect(() => {
         if (!isLoading && isAuthenticated) {
@@ -47,9 +89,7 @@ export default function LoginPage() {
             const response = await api.post<ApiResponse<AuthResponse>>('/auth/login', data);
 
             if (response.data.success) {
-                // Success
                 toast.success("Giriş başarılı! Yönlendiriliyorsunuz...");
-                // login function in AuthContext will handle the redirect
                 login(response.data.data);
             }
         } catch (error: any) {
@@ -66,56 +106,96 @@ export default function LoginPage() {
 
     return (
         <div className="flex h-screen w-full overflow-hidden bg-white">
-            {/* Left Side: Visual & Branding */}
-            <div className="hidden lg:block lg:w-1/2 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-brand-600/20 to-black/60 z-10" />
-                <Image
-                    src="/images/login-bg.png"
-                    alt="Education Background"
-                    fill
-                    className="object-cover scale-105 hover:scale-100 transition-transform duration-10000"
-                    priority
-                />
-
-                {/* Brand Overlay Content */}
-                <div className="absolute inset-0 z-20 flex flex-col justify-between p-12 text-white">
-                    <Link href="/" className="flex items-center gap-2 w-fit">
-                        <div className="relative w-10 h-10 group-hover:scale-110 transition-transform">
+            {/* Left Side: Dynamic Slider */}
+            <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gray-900 items-center justify-center">
+                {/* Slides Fade Transition */}
+                {slides.map((slide, index) => (
+                    <div
+                        key={slide.id}
+                        className={cn(
+                            "absolute inset-0 transition-opacity duration-1000 ease-in-out z-10",
+                            currentSlideIndex === index ? "opacity-100" : "opacity-0 pointer-events-none"
+                        )}
+                    >
+                        {/* Background Image */}
+                        <div className="absolute inset-0 z-0">
                             <Image
-                                src="/images/logo2.png"
-                                alt="Testoloji Logo"
+                                src={slide.image}
+                                alt={slide.title}
                                 fill
-                                className="object-contain drop-shadow-lg"
+                                className="object-cover scale-105 transition-transform duration-[10s] ease-linear"
+                                style={{
+                                    transform: currentSlideIndex === index ? "scale(1.1)" : "scale(1.0)"
+                                }}
+                                priority
                             />
                         </div>
-                        <span className="text-2xl font-black tracking-tighter uppercase">Testoloji</span>
-                    </Link>
 
-                    <div className="space-y-6 max-w-lg">
-                        <h1 className="text-5xl font-extrabold leading-tight tracking-tight">
-                            Eğitimi <span className="text-brand-400">Teknolojiyle</span> Yeniden Şekillendirin.
-                        </h1>
-                        <p className="text-lg text-gray-200 leading-relaxed font-medium">
-                            Profesyonel soru bankası ve test oluşturma platformu ile saniyeler içinde kaliteli içerikler hazırlayın.
-                        </p>
+                        {/* Gradient Overlay */}
+                        <div className={cn("absolute inset-0 bg-gradient-to-br mix-blend-multiply z-10", slide.color)} />
 
-                        <div className="flex gap-4 pt-4 text-sm font-semibold">
-                            <div className="px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
-                                +10k Soru
+                        {/* Content */}
+                        <div className="relative z-20 h-full flex flex-col justify-between p-12 text-white">
+                            <Link href="/" className="flex items-center gap-2 w-fit">
+                                <div className="relative w-10 h-10 bg-white/10 rounded-xl p-1 backdrop-blur-sm border border-white/20">
+                                    <Image
+                                        src="/images/logo2.png"
+                                        alt="Testoloji Logo"
+                                        fill
+                                        className="object-contain p-1"
+                                    />
+                                </div>
+                                <span className="text-2xl font-black tracking-tighter uppercase drop-shadow-md">Testoloji</span>
+                            </Link>
+
+                            <div className="space-y-8 max-w-xl mx-auto">
+                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-bold tracking-widest uppercase">
+                                    <Sparkles className={cn("w-3.5 h-3.5", slide.iconColor)} />
+                                    {slide.badge}
+                                </div>
+
+                                <div className="space-y-4">
+                                    <h2 className="text-xl font-medium text-white/80">{slide.title}</h2>
+                                    <h1 className="text-5xl font-extrabold leading-tight tracking-tight">
+                                        {slide.headline}
+                                    </h1>
+                                    <p className="text-lg text-white/90 leading-relaxed font-medium">
+                                        {slide.description}
+                                    </p>
+                                </div>
+
+                                <div className="space-y-4 pt-4">
+                                    {slide.features.map((feature, i) => (
+                                        <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 hover:bg-white/20 transition-colors">
+                                            <div className="shrink-0 p-2 bg-white/20 rounded-lg">
+                                                <feature.icon className="w-5 h-5 text-white" />
+                                            </div>
+                                            <span className="font-bold text-sm tracking-wide">{feature.text}</span>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
-                            <div className="px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
-                                Akıllı Mizanpaj
-                            </div>
-                            <div className="px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
-                                PDF Export
+
+                            <div className="flex justify-between items-end">
+                                <div className="flex gap-2">
+                                    {slides.map((_, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => setCurrentSlideIndex(idx)}
+                                            className={cn(
+                                                "h-1.5 rounded-full transition-all duration-300",
+                                                currentSlideIndex === idx ? "w-8 bg-white" : "w-2 bg-white/40 hover:bg-white/60"
+                                            )}
+                                        />
+                                    ))}
+                                </div>
+                                <div className="text-xs text-white/50 font-medium">
+                                    © 2026 Testoloji Akademi.
+                                </div>
                             </div>
                         </div>
                     </div>
-
-                    <div className="text-sm text-gray-400 font-medium">
-                        © 2026 Testoloji. Tüm hakları saklıdır.
-                    </div>
-                </div>
+                ))}
             </div>
 
             {/* Right Side: Login Form */}
@@ -141,36 +221,38 @@ export default function LoginPage() {
                         </p>
 
                         {/* Quick Login Section */}
-                        <div className="pt-2 flex flex-wrap gap-2">
-                            <button
-                                onClick={() => quickLogin("admin@mail.com", "123456")}
-                                type="button"
-                                className="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-[10px] font-black uppercase tracking-widest border border-red-100 hover:bg-red-100 transition-colors"
-                            >
-                                ADMIN
-                            </button>
-                            <button
-                                onClick={() => quickLogin("teacher@mail.com", "123456")}
-                                type="button"
-                                className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-black uppercase tracking-widest border border-blue-100 hover:bg-blue-100 transition-colors"
-                            >
-                                ÖĞRETMEN
-                            </button>
-                            <button
-                                onClick={() => quickLogin("sercan@mail.com", "Ko1blackno.")}
-                                type="button"
-                                className="px-3 py-1.5 bg-orange-50 text-orange-600 rounded-lg text-[10px] font-black uppercase tracking-widest border border-orange-100 hover:bg-orange-100 transition-colors"
-                            >
-                                SERCAN
-                            </button>
-                            <button
-                                onClick={() => quickLogin("soner@mail.com", "123456")}
-                                type="button"
-                                className="px-3 py-1.5 bg-orange-50 text-orange-600 rounded-lg text-[10px] font-black uppercase tracking-widest border border-orange-100 hover:bg-orange-100 transition-colors"
-                            >
-                                SONER
-                            </button>
-                        </div>
+                        {process.env.NEXT_PUBLIC_IS_DEVELOPMENT === 'true' && (
+                            <div className="pt-2 flex flex-wrap gap-2">
+                                <button
+                                    onClick={() => quickLogin("admin@mail.com", "123456")}
+                                    type="button"
+                                    className="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-[10px] font-black uppercase tracking-widest border border-red-100 hover:bg-red-100 transition-colors"
+                                >
+                                    ADMIN
+                                </button>
+                                <button
+                                    onClick={() => quickLogin("teacher@mail.com", "123456")}
+                                    type="button"
+                                    className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-black uppercase tracking-widest border border-blue-100 hover:bg-blue-100 transition-colors"
+                                >
+                                    ÖĞRETMEN
+                                </button>
+                                <button
+                                    onClick={() => quickLogin("sercan@mail.com", "Ko1blackno.")}
+                                    type="button"
+                                    className="px-3 py-1.5 bg-orange-50 text-orange-600 rounded-lg text-[10px] font-black uppercase tracking-widest border border-orange-100 hover:bg-orange-100 transition-colors"
+                                >
+                                    SERCAN
+                                </button>
+                                <button
+                                    onClick={() => quickLogin("soner@mail.com", "123456")}
+                                    type="button"
+                                    className="px-3 py-1.5 bg-orange-50 text-orange-600 rounded-lg text-[10px] font-black uppercase tracking-widest border border-orange-100 hover:bg-orange-100 transition-colors"
+                                >
+                                    SONER
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

@@ -1,18 +1,25 @@
 "use client";
 
 import { Folder, BookOpen, Calendar } from "lucide-react";
-import { PROJECT_LIMITS } from "@/config/limits";
+import { ROLE_PROJECT_LIMITS, GUEST_LIMITS } from "@/config/limits";
 import { Role } from "@/types/auth";
 
 interface ProjectStatsProps {
     projects: any[];
-    userRole: Role;
+    userRole?: Role;
+    isGuest?: boolean;
 }
 
-export const ProjectStats = ({ projects, userRole }: ProjectStatsProps) => {
+export const ProjectStats = ({ projects, userRole, isGuest = false }: ProjectStatsProps) => {
     const totalQuestions = projects.reduce((acc: number, p: any) => acc + (p._count?.questions || 0), 0);
     const activeDate = new Date().toLocaleDateString("tr-TR", { day: 'numeric', month: 'long' });
-    const projectLimit = PROJECT_LIMITS[userRole];
+
+    let projectLimit = 0;
+    if (isGuest) {
+        projectLimit = GUEST_LIMITS.projects;
+    } else if (userRole) {
+        projectLimit = ROLE_PROJECT_LIMITS[userRole] || 0;
+    }
 
     const stats = [
         {

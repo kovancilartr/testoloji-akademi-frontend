@@ -21,6 +21,7 @@ export interface User {
     createdAt: string;
     updatedAt: string;
     passwordChangeRequired?: boolean;
+    hasCoachingAccess?: boolean;
 }
 
 export interface AuthResponse {

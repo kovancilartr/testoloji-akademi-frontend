@@ -24,6 +24,7 @@ interface UserRowProps {
     onTierChange: (userId: string, tier: SubscriptionTier) => void;
     onToggleStatus: (userId: string) => void;
     onDeleteClick: (user: any) => void;
+    onToggleCoachingAccess: (userId: string, currentStatus: boolean) => void;
 }
 
 export const UserRow = ({
@@ -32,7 +33,8 @@ export const UserRow = ({
     onRoleChange,
     onTierChange,
     onToggleStatus,
-    onDeleteClick
+    onDeleteClick,
+    onToggleCoachingAccess
 }: UserRowProps) => {
     const getRoleBadge = (role: Role) => {
         switch (role) {
@@ -44,8 +46,15 @@ export const UserRow = ({
                 );
             case Role.TEACHER:
                 return (
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 text-[9px] font-black rounded-lg uppercase tracking-widest border border-blue-100 max-w-fit">
-                        <UserCog className="h-3 w-3" /> Eğitmen
+                    <div className="flex flex-col gap-1 max-w-fit">
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 text-[9px] font-black rounded-lg uppercase tracking-widest border border-blue-100">
+                            <UserCog className="h-3 w-3" /> Eğitmen
+                        </div>
+                        {user.hasCoachingAccess && (
+                            <div className="flex items-center gap-1.5 px-3 py-1 bg-purple-50 text-purple-600 text-[8px] font-black rounded-lg uppercase tracking-widest border border-purple-100">
+                                <Crown className="h-2.5 w-2.5" /> Koç
+                            </div>
+                        )}
                     </div>
                 );
             case Role.STUDENT:
@@ -247,7 +256,17 @@ export const UserRow = ({
                             <div className="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center"><GraduationCap className="h-3.5 w-3.5" /></div> Öğrenci Yap
                         </DropdownMenuItem>
 
+                        {user.role === Role.TEACHER && (
+                            <>
+                                <DropdownMenuSeparator className="bg-gray-50 mx-1 my-1" />
+                                <DropdownMenuItem onClick={() => onToggleCoachingAccess(user.id, user.hasCoachingAccess)} className="rounded-xl flex items-center gap-2 font-bold focus:bg-purple-50 focus:text-purple-600 cursor-pointer text-xs py-2">
+                                    <div className="w-6 h-6 rounded-lg bg-purple-100 flex items-center justify-center"><Crown className="h-3.5 w-3.5" /></div>
+                                    {user.hasCoachingAccess ? "Koçluk Yetkisini Al" : "Koçluk Yetkisi Ver"}
+                                </DropdownMenuItem>
+                            </>
+                        )}
                         <DropdownMenuSeparator className="bg-gray-50 mx-1 my-1" />
+
 
                         <DropdownMenuItem
                             onClick={() => onToggleStatus(user.id)}
