@@ -238,7 +238,7 @@ export default function ExamPage({ params }: { params: Promise<{ assignmentId: s
                                 {isReviewMode ? "İnceleme" : "CANLI SINAV"}
                             </Badge>
                             <h1 className="text-sm md:text-lg font-black text-slate-900 tracking-tight line-clamp-1">
-                                {exam.project.name}
+                                {exam.project?.name || "Yükleniyor..."}
                             </h1>
                         </div>
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">

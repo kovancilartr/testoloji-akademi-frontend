@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/contexts/AuthContext";
 import { useStudentStats } from "@/hooks/use-users";
+import { useAssignments } from "@/hooks/use-assignments";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,7 +32,10 @@ export default function StudentDashboard() {
     const { user } = useAuth();
     const router = useRouter();
     const { data: stats, isLoading } = useStudentStats();
+    const { data: assignments, isLoading: assignmentsLoading } = useAssignments();
     const colors = useThemeColors();
+
+    const upcomingAssignments = assignments?.filter(a => a.status === 'PENDING').slice(0, 3) || [];
 
     const statCards = [
         {
@@ -208,27 +212,63 @@ export default function StudentDashboard() {
                 {/* Son Ödevler */}
                 <div className="lg:col-span-2 space-y-4">
                     <h3 className="text-2xl font-black text-gray-900">Yaklaşan Ödevler</h3>
-                    <Card className="border-gray-100 shadow-sm rounded-xl">
-                        <CardContent className="p-6">
-                            <div className="flex items-center gap-4 mb-4">
-                                <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center", colors.iconBg)}>
-                                    <FileText className={cn("w-6 h-6", colors.text)} />
-                                </div>
-                                <div className="flex-1">
-                                    <h4 className="font-bold text-gray-900">Henüz ödev yok</h4>
-                                    <p className="text-sm text-gray-500">Öğretmenin yeni ödev atadığında burada görünecek</p>
-                                </div>
+                    <div className="space-y-3">
+                        {assignmentsLoading ? (
+                            <Skeleton className="h-40 rounded-xl" />
+                        ) : upcomingAssignments.length === 0 ? (
+                            <Card className="border-gray-100 shadow-sm rounded-xl">
+                                <CardContent className="p-6">
+                                    <div className="flex items-center gap-4 mb-4">
+                                        <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center", colors.iconBg)}>
+                                            <FileText className={cn("w-6 h-6", colors.text)} />
+                                        </div>
+                                        <div className="flex-1">
+                                            <h4 className="font-bold text-gray-900">Henüz ödev yok</h4>
+                                            <p className="text-sm text-gray-500">Öğretmenin yeni ödev atadığında burada görünecek</p>
+                                        </div>
+                                    </div>
+                                    <Button
+                                        variant="outline"
+                                        className="w-full rounded-xl font-bold border-gray-200 hover:bg-white"
+                                        onClick={() => router.push("/dashboard/student/assignments")}
+                                    >
+                                        Ödevler Sayfasına Git
+                                        <ArrowRight className="w-4 h-4 ml-2" />
+                                    </Button>
+                                </CardContent>
+                            </Card>
+                        ) : (
+                            <div className="space-y-3">
+                                {upcomingAssignments.map((assignment: any) => (
+                                    <Card
+                                        key={assignment.id}
+                                        className="border-gray-50 shadow-sm rounded-xl hover:shadow-md transition-all cursor-pointer group"
+                                        onClick={() => router.push(
+                                            assignment.type === 'TEST'
+                                                ? `/dashboard/student/exam/${assignment.id}`
+                                                : '/dashboard/student/assignments'
+                                        )}
+                                    >
+                                        <CardContent className="p-4 flex items-center gap-4">
+                                            <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center bg-gray-50 group-hover:bg-white transition-colors")}>
+                                                <FileText className={cn("w-5 h-5 text-gray-400 group-hover:text-brand-500")} />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <h4 className="font-bold text-gray-900 truncate">{assignment.title}</h4>
+                                                <p className="text-xs text-gray-500 flex items-center gap-1">
+                                                    <CalendarDays className="w-3 h-3" />
+                                                    {assignment.dueDate ? new Date(assignment.dueDate).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' }) : 'Süresiz'}
+                                                </p>
+                                            </div>
+                                            <Button variant="ghost" size="sm" className="font-bold group-hover:text-brand-600">
+                                                Çöz <ArrowRight className="w-4 h-4 ml-1" />
+                                            </Button>
+                                        </CardContent>
+                                    </Card>
+                                ))}
                             </div>
-                            <Button
-                                variant="outline"
-                                className="w-full rounded-xl font-bold border-gray-200 hover:bg-white"
-                                onClick={() => router.push("/dashboard/student/assignments")}
-                            >
-                                Tüm Ödevleri Gör
-                                <ArrowRight className="w-4 h-4 ml-2" />
-                            </Button>
-                        </CardContent>
-                    </Card>
+                        )}
+                    </div>
                 </div>
 
                 {/* Gelişim Durumu */}

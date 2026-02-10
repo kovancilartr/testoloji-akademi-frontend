@@ -46,6 +46,8 @@ export const useStudentStats = () => {
             const { data } = await api.get<ApiResponse<any>>("/users/student-stats");
             return data.data;
         },
+        refetchInterval: 300000, // 5 dakikada bir sayaçları güncelle
+        refetchOnWindowFocus: true, // Uygulamaya geri dönüldüğünde tazele
     });
 };
 

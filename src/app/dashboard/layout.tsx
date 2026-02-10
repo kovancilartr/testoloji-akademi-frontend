@@ -9,6 +9,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Menu, GraduationCap } from "lucide-react";
 import { ForcePasswordChangeModal } from "@/components/ui/custom-ui/auth/ForcePasswordChangeModal";
+import { NotificationPopover } from "@/components/ui/custom-ui/dashboard-components/NotificationPopover";
 
 export default function DashboardLayout({
     children,
@@ -45,16 +46,19 @@ export default function DashboardLayout({
                             <span className="font-black text-lg tracking-tight text-gray-900">TESTOLOJİ</span>
                         </div>
 
-                        <Sheet>
-                            <SheetTrigger asChild>
-                                <Button variant="ghost" size="icon" className="text-gray-500">
-                                    <Menu className="w-6 h-6" />
-                                </Button>
-                            </SheetTrigger>
-                            <SheetContent side="left" className="p-0 w-[280px] border-r-0">
-                                <AppSidebar className="w-full h-full border-none" />
-                            </SheetContent>
-                        </Sheet>
+                        <div className="flex items-center gap-2">
+                            <NotificationPopover />
+                            <Sheet>
+                                <SheetTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="text-gray-500">
+                                        <Menu className="w-6 h-6" />
+                                    </Button>
+                                </SheetTrigger>
+                                <SheetContent side="left" className="p-0 w-[280px] border-r-0">
+                                    <AppSidebar className="w-full h-full border-none" />
+                                </SheetContent>
+                            </Sheet>
+                        </div>
                     </header>
                 )}
 

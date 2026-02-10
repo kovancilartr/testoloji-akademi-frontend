@@ -9,6 +9,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import DashboardHeaderMobile from './DashboardHeaderMobile';
 import DashboardHeaderMainNavigation from './DashboardHeaderMainNavigation';
 
+import { NotificationPopover } from "./NotificationPopover";
+
 interface DashboardHeaderProps {
     // Editor specific props (only used in project page)
     title?: string;
@@ -68,7 +70,8 @@ export function DashboardHeader({ editorActions }: DashboardHeaderProps) {
                 </div>
 
                 {/* User Area Dropdown */}
-                <div className="flex items-center gap-3 shrink-0">
+                <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                    <NotificationPopover />
                     <UserDropdown />
                 </div>
             </div>

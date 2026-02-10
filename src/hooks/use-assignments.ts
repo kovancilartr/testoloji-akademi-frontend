@@ -44,6 +44,7 @@ export function useAssignments(studentId?: string) {
             const response = await api.get("/assignments", { params });
             return response.data.data as Assignment[];
         },
+        refetchInterval: 120000, // 2 dakikada bir ödev listesini tazele
     });
 }
 

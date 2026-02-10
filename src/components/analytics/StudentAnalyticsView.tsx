@@ -45,7 +45,7 @@ export function StudentAnalyticsView({ studentId }: StudentAnalyticsViewProps) {
     const { data: analytics, isLoading } = useStudentAnalytics(studentId);
     const [selectedExam, setSelectedExam] = useState<any>(null);
 
-    if (isLoading) return <div className="h-40 flex items-center justify-center font-bold text-slate-400 animate-pulse">Analitik veriler yükleniyor...</div>;
+    if (isLoading) return <div className="h-40 flex items-center justify-center font-bold text-slate-400 animate-pulse">Analiz verileri yükleniyor...</div>;
     if (!analytics) return <div className="p-8 text-center text-slate-400">Analiz verisi bulunamadı.</div>;
 
     return (

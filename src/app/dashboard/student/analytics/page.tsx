@@ -2,7 +2,6 @@
 
 import { StudentAnalyticsView } from "@/components/analytics/StudentAnalyticsView";
 import { BarChart3, Info } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function StudentAnalyticsPage() {
     return (

@@ -25,6 +25,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { UserDropdown } from "@/components/ui/custom-ui/dashboard-components/UserDropdown";
 import { useThemeColors } from "@/contexts/ThemeContext";
+import { NotificationPopover } from "@/components/ui/custom-ui/dashboard-components/NotificationPopover";
 
 interface SidebarProps {
     className?: string;
@@ -129,10 +130,11 @@ export function AppSidebar({ className }: SidebarProps) {
                     icon: LayoutDashboard,
                 },
                 {
-                    label: "Analiz Raporlarım",
-                    href: "/dashboard/student/analytics",
-                    icon: BarChart3,
+                    label: "Kurslar",
+                    href: "/dashboard/student/library",
+                    icon: BookOpen,
                 },
+
                 {
                     label: "Ders Programım",
                     href: "/dashboard/student/schedule",
@@ -144,10 +146,11 @@ export function AppSidebar({ className }: SidebarProps) {
                     icon: BookOpenCheck,
                 },
                 {
-                    label: "Kütüphanem (Kurslar)",
-                    href: "/dashboard/student/library",
-                    icon: BookOpen,
+                    label: "Analiz Raporlarım",
+                    href: "/dashboard/student/analytics",
+                    icon: BarChart3,
                 },
+
             ],
         },
     ];
@@ -166,7 +169,7 @@ export function AppSidebar({ className }: SidebarProps) {
         >
             {/* Logo Alanı */}
             <div className="h-16 flex items-center px-6 border-b border-gray-100">
-                <Link href="/dashboard" className="flex items-center gap-3 overflow-hidden group">
+                <Link href="/" className="flex items-center gap-3 overflow-hidden group">
                     <div className="relative w-8 h-8 shrink-0 transition-transform duration-300 group-hover:scale-110">
                         <Image
                             src="/images/logo2.png"
@@ -219,12 +222,16 @@ export function AppSidebar({ className }: SidebarProps) {
             </div>
 
             {/* Alt Kısım: Profil ve Ayarlar */}
-            <div className="p-4 border-t border-gray-100 space-y-2 bg-gray-50/50">
+            <div className={cn(
+                "p-2 border-t border-gray-100 bg-gray-50/50 flex gap-2",
+                isCollapsed ? "flex-col items-center py-6" : "items-center"
+            )}>
+                <NotificationPopover side="right" align="end" />
                 <UserDropdown
                     side="right"
                     align="end"
                     trigger={
-                        <div className={cn("flex items-center gap-3 p-2 rounded-xl border border-gray-200 bg-white cursor-pointer hover:bg-gray-50 transition-colors group", isCollapsed && "justify-center border-none p-0 bg-transparent")}>
+                        <div className={cn("flex w-full items-center gap-3 p-2 rounded-xl border border-gray-200 bg-white cursor-pointer hover:bg-gray-50 transition-colors group", isCollapsed && "justify-center border-none p-0 bg-transparent")}>
                             <Avatar className="w-9 h-9 border border-gray-100 shrink-0">
                                 <AvatarFallback className="bg-orange-100 text-orange-600 font-bold">
                                     {user?.name?.charAt(0) || "U"}
