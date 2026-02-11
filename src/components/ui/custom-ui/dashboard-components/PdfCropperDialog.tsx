@@ -128,25 +128,34 @@ export default function PdfCropperDialog({ projectId, onQuestionAdded, onBeforeO
             try {
                 toast.loading("Bölge taranıyor...", { id: "magic-scan" });
 
-                // Get canvas blob
-                const blob = await new Promise<Blob | null>(resolve => canvasRef.current!.toBlob(resolve, 'image/png'));
+                // --- COMPRESSION: Create a smaller JPEG instead of high-res PNG ---
+                const canvas = canvasRef.current;
+                const scaleX = canvas.width / canvas.clientWidth;
+                const scaleY = canvas.height / canvas.clientHeight;
+
+                const scanCanvas = document.createElement('canvas');
+                const MAX_DIM = 1500;
+                let sWidth = c.width * scaleX;
+                let sHeight = c.height * scaleY;
+
+                // Scale down if too large
+                if (sWidth > MAX_DIM || sHeight > MAX_DIM) {
+                    const ratio = Math.min(MAX_DIM / sWidth, MAX_DIM / sHeight);
+                    sWidth *= ratio;
+                    sHeight *= ratio;
+                }
+
+                scanCanvas.width = sWidth;
+                scanCanvas.height = sHeight;
+                const sCtx = scanCanvas.getContext('2d');
+                if (sCtx) {
+                    sCtx.drawImage(canvasRef.current!, c.x * scaleX, c.y * scaleY, c.width * scaleX, c.height * scaleY, 0, 0, sWidth, sHeight);
+                }
+
+                const blob = await new Promise<Blob | null>(resolve => scanCanvas.toBlob(resolve, 'image/jpeg', 0.6));
                 if (!blob) throw new Error("Canvas error");
 
                 const file = new File([blob], "scan.png", { type: "image/png" });
-
-                // Get scale factors (Canvas vs Natural)
-                // canvas.width is the Actual Resolution
-                // canvas.clientWidth is the Display Size
-                // The crop 'c' comes in pixel units relative to Display Size (thanks to react-image-crop)
-                // BUT we need to send coordinates relative to the Actual Resolution for the backend?
-                // Actually wait... react-image-crop (PixelCrop) returns coords relative to the IMAGE (if configured correctly)
-                // Let's look at how setCompletedCrop uses it below:
-                // x: c.x * scaleX (where scaleX = canvas.width / canvas.clientWidth)
-                // This means 'c' is in DISPLAY pixels. 
-                // So we need to convert 'c' to ACTUAL CANVAS pixels for the backend.
-
-                const scaleX = canvasRef.current.width / canvasRef.current.clientWidth;
-                const scaleY = canvasRef.current.height / canvasRef.current.clientHeight;
 
                 // Call Magic Scan with ROI (in Actual Pixels)
                 const rects = await detectQuestionBlocks(file, {
