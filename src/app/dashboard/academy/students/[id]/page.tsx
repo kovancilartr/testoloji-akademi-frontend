@@ -19,6 +19,15 @@ import { StudentAnalyticsView } from "@/components/analytics/StudentAnalyticsVie
 import { cn } from "@/lib/utils";
 import { useThemeColors } from "@/contexts/ThemeContext";
 import { ContactStudentDialog } from "@/components/ui/custom-ui/dashboard-components/ContactStudentDialog";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+import { ChevronRight } from "lucide-react";
 
 import { RoleProtect } from "@/components/providers/RoleProtect";
 import { Role } from "@/types/auth";
@@ -33,6 +42,8 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
     const [isEditingNotes, setIsEditingNotes] = useState(false);
     const [notes, setNotes] = useState("");
     const [isContactOpen, setIsContactOpen] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 5;
 
     useEffect(() => {
         if (student?.notes) setNotes(student.notes);
@@ -218,58 +229,120 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
                                     Ödev ve Test Geçmişi
                                 </h2>
 
-                                <div className="space-y-4">
-                                    {student.assignments?.map(assignment => (
-                                        <Card key={assignment.id} className="border-none shadow-sm hover:ring-2 hover:ring-orange-200 transition-all group overflow-hidden bg-white">
-                                            <CardContent className="p-0">
-                                                <div className="flex items-stretch">
-                                                    <div className={`w-2 ${assignment.status === 'COMPLETED' ? 'bg-green-500' : 'bg-gray-200'}`} />
-                                                    <div className="flex-1 p-6 flex items-center justify-between">
-                                                        <div className="flex items-center gap-4">
-                                                            <div className={cn("w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform border border-gray-100", colors.text)}>
-                                                                {assignment.type === 'TEST' ? <FileText className="w-6 h-6" /> : <Clock className="w-6 h-6" />}
+                                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                                    <Table>
+                                        <TableHeader className="bg-gray-50/50">
+                                            <TableRow>
+                                                <TableHead className="font-bold text-[11px] uppercase tracking-widest text-gray-400 pl-6">İçerik Türü</TableHead>
+                                                <TableHead className="font-bold text-[11px] uppercase tracking-widest text-gray-400">Ödev / Test Adı</TableHead>
+                                                <TableHead className="font-bold text-[11px] uppercase tracking-widest text-gray-400">Tarih</TableHead>
+                                                <TableHead className="font-bold text-[11px] uppercase tracking-widest text-gray-400">Durum</TableHead>
+                                                <TableHead className="font-bold text-[11px] uppercase tracking-widest text-gray-400 text-center">Başarı</TableHead>
+                                                <TableHead className="font-bold text-[11px] uppercase tracking-widest text-gray-400 text-right pr-6">İşlem</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {student.assignments?.length === 0 ? (
+                                                <TableRow>
+                                                    <TableCell colSpan={6} className="h-32 text-center text-gray-400 font-medium">
+                                                        Henüz ödev veya test geçmişi bulunmuyor.
+                                                    </TableCell>
+                                                </TableRow>
+                                            ) : (
+                                                student.assignments?.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((assignment) => (
+                                                    <TableRow key={assignment.id} className="hover:bg-gray-50/50 transition-colors group">
+                                                        <TableCell className="pl-6">
+                                                            <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center border border-gray-100 bg-gray-50 group-hover:bg-white transition-colors", colors.text)}>
+                                                                {assignment.type === 'TEST' ? <FileText className="w-5 h-5" /> : <Clock className="w-5 h-5" />}
                                                             </div>
-                                                            <div>
-                                                                <h3 className={cn("font-bold text-gray-900 transition-colors", `group-hover:${colors.text}`)}>{assignment.title}</h3>
-                                                                <p className="text-xs text-gray-400 flex items-center gap-1 mt-1 font-medium">
-                                                                    <Calendar className="w-3 h-3" /> {formatDate(assignment.createdAt)}
-                                                                </p>
-                                                            </div>
-                                                        </div>
-
-                                                        <div className="flex items-center gap-8">
+                                                        </TableCell>
+                                                        <TableCell className="font-bold text-gray-900">
+                                                            {assignment.title}
+                                                        </TableCell>
+                                                        <TableCell className="text-gray-500 font-medium text-xs">
+                                                            {formatDate(assignment.createdAt)}
+                                                        </TableCell>
+                                                        <TableCell>
                                                             {assignment.status === 'COMPLETED' ? (
-                                                                <div className="text-right">
-                                                                    <div className="text-sm font-black text-green-600">%{assignment.grade?.toFixed(0)}</div>
-                                                                    <Badge variant="outline" className="text-[10px] bg-green-50 text-green-700 border-green-200 font-bold px-2 py-0">
-                                                                        BAŞARILI
-                                                                    </Badge>
-                                                                </div>
+                                                                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 font-black text-[9px] uppercase tracking-tighter px-2">
+                                                                    TAMAMLANDI
+                                                                </Badge>
                                                             ) : (
-                                                                <Badge variant="outline" className="bg-gray-50 text-gray-500 border-gray-200 font-bold px-2 py-0">
+                                                                <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 font-black text-[9px] uppercase tracking-tighter px-2">
                                                                     BEKLİYOR
                                                                 </Badge>
                                                             )}
-
+                                                        </TableCell>
+                                                        <TableCell className="text-center">
+                                                            {assignment.status === 'COMPLETED' ? (
+                                                                <span className="text-sm font-black text-gray-900">%{assignment.grade?.toFixed(0)}</span>
+                                                            ) : (
+                                                                <span className="text-gray-300">-</span>
+                                                            )}
+                                                        </TableCell>
+                                                        <TableCell className="text-right pr-6">
                                                             <Button
-                                                                size="sm"
                                                                 variant="ghost"
-                                                                className={cn("font-bold", colors.hover, colors.text)}
+                                                                size="sm"
+                                                                className={cn("font-bold text-xs h-8 px-3 rounded-lg flex items-center gap-1.5 ml-auto cursor-pointer", colors.text, colors.hover)}
                                                                 onClick={() => {
                                                                     if (assignment.type === 'TEST') {
                                                                         router.push(`/dashboard/student/exam/${assignment.id}`);
                                                                     }
                                                                 }}
                                                             >
-                                                                <ArrowUpRight className="w-4 h-4 mr-1" />
-                                                                {assignment.status === 'COMPLETED' ? 'İncele' : 'Detay'}
+                                                                İncele
+                                                                <ChevronRight className="w-3.5 h-3.5" />
                                                             </Button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </CardContent>
-                                        </Card>
-                                    ))}
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))
+                                            )}
+                                        </TableBody>
+                                    </Table>
+
+                                    {/* Pagination */}
+                                    {student.assignments && student.assignments.length > itemsPerPage && (
+                                        <div className="p-4 border-t border-gray-100 bg-gray-50/30 flex items-center justify-between">
+                                            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+                                                Gösterilen: {(currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, student.assignments.length)} / Toplam: {student.assignments.length}
+                                            </p>
+                                            <div className="flex items-center gap-1">
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    disabled={currentPage === 1}
+                                                    onClick={() => setCurrentPage(prev => prev - 1)}
+                                                    className="h-8 w-8 p-0 rounded-lg border-gray-200 text-gray-600 disabled:opacity-30 cursor-pointer"
+                                                >
+                                                    <ChevronLeft className="w-4 h-4" />
+                                                </Button>
+                                                {Array.from({ length: Math.ceil(student.assignments.length / itemsPerPage) }).map((_, i) => (
+                                                    <Button
+                                                        key={i}
+                                                        variant={currentPage === i + 1 ? "default" : "outline"}
+                                                        size="sm"
+                                                        onClick={() => setCurrentPage(i + 1)}
+                                                        className={cn(
+                                                            "h-8 w-8 p-0 rounded-lg font-bold text-xs border-gray-200 cursor-pointer",
+                                                            currentPage === i + 1 ? cn(colors.buttonBg, colors.buttonHover, "text-white border-transparent") : "text-gray-600 hover:bg-white"
+                                                        )}
+                                                    >
+                                                        {i + 1}
+                                                    </Button>
+                                                ))}
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    disabled={currentPage === Math.ceil(student.assignments.length / itemsPerPage)}
+                                                    onClick={() => setCurrentPage(prev => prev + 1)}
+                                                    className="h-8 w-8 p-0 rounded-lg border-gray-200 text-gray-600 disabled:opacity-30 cursor-pointer"
+                                                >
+                                                    <ChevronRight className="w-4 h-4" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 

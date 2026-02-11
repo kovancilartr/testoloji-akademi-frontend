@@ -9,6 +9,14 @@ import { Loader2, UserCog } from "lucide-react";
 import { toast } from "sonner";
 import { useUpdateStudent, Student } from "@/hooks/use-students";
 import { useThemeColors } from "@/contexts/ThemeContext";
+import { GRADE_LEVELS } from "@/lib/constants";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 interface EditStudentDialogProps {
     isOpen: boolean;
@@ -97,12 +105,21 @@ export function EditStudentDialog({
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="edit-grade">Sınıf / Seviye</Label>
-                            <Input
-                                id="edit-grade"
+                            <Select
                                 value={formData.gradeLevel}
-                                onChange={(e) => setFormData({ ...formData, gradeLevel: e.target.value })}
-                                placeholder="Örn: 12. Sınıf"
-                            />
+                                onValueChange={(value) => setFormData({ ...formData, gradeLevel: value })}
+                            >
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Seçin" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {GRADE_LEVELS.map((grade) => (
+                                        <SelectItem key={grade} value={grade}>
+                                            {grade}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="edit-phone">Telefon</Label>

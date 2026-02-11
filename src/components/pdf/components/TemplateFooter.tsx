@@ -42,27 +42,65 @@ export const TemplateFooter = ({ template, settings, primaryColor }: any) => {
 
     if (template === 'compact') {
         return (
-            <View style={tw("absolute bottom-[10px] left-[15px] right-[15px] flex-row justify-between items-center")} fixed>
-                <Text style={tw("text-[6px] text-gray-400 font-bold uppercase")}>Testoloji Compact</Text>
-                <View style={tw("flex-row items-center gap-2")}>
-                    <View style={{ width: 10, height: 1, backgroundColor: primaryColor }} />
-                    <Text style={{ fontSize: 9, fontWeight: 'black', color: '#333' }} render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
-                    <View style={{ width: 10, height: 1, backgroundColor: primaryColor }} />
+            <View style={tw("absolute bottom-[10px] left-[15px] right-[15px] flex-row items-center justify-between")} fixed>
+                <Text style={tw("text-[6px] text-gray-400 font-bold uppercase tracking-widest")}>Testoloji Compact 2.0</Text>
+                <View style={tw("items-center justify-center")}>
+                    <View style={{
+                        width: 18,
+                        height: 18,
+                        backgroundColor: primaryColor,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}>
+                        <Text style={{ fontSize: 9, fontWeight: 'black', color: 'white' }} render={({ pageNumber }) => `${pageNumber}`} />
+                    </View>
                 </View>
-                <Text style={tw("text-[6px] text-gray-400 font-bold uppercase")}>{new Date().toLocaleDateString()}</Text>
+                <Text style={tw("text-[6px] text-gray-400 font-bold uppercase")}>{new Date().toLocaleDateString('tr-TR')}</Text>
             </View>
         );
     }
 
     if (template === 'elegant') {
         return (
-            <View style={tw("absolute bottom-[20px] left-[40px] right-[40px] items-center")} fixed>
-                <View style={tw("flex-row items-center gap-20 mb-2")}>
-                    <Text style={tw("text-[5px] text-gray-400 font-bold uppercase tracking-[4px]")}>Authentic Design</Text>
-                    <Text style={{ fontSize: 9, fontWeight: 'bold', color: '#111', fontFamily: 'Montserrat' }} render={({ pageNumber }) => `- ${pageNumber} -`} />
-                    <Text style={tw("text-[5px] text-gray-400 font-bold uppercase tracking-[4px]")}>Elegance Series</Text>
+            <View style={tw("absolute bottom-[10px] left-[20px] right-[20px] flex-row items-end justify-between")} fixed>
+                {/* Left Decoration */}
+                <View style={tw("flex-row items-center")}>
+                    <Text style={{ fontSize: 18, fontWeight: 'black', color: primaryColor, opacity: 0.8 }}>{'>>'}</Text>
                 </View>
-                <View style={{ width: 100, height: 0.5, backgroundColor: primaryColor }} />
+
+                {/* Center Page Number */}
+                <View style={tw("items-center")}>
+                    <View style={{
+                        width: 24,
+                        height: 24,
+                        borderRadius: 12,
+                        borderWidth: 1,
+                        borderColor: primaryColor,
+                        backgroundColor: 'white',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        position: 'relative'
+                    }}>
+                        <View style={{
+                            width: 20,
+                            height: 20,
+                            borderRadius: 10,
+                            borderWidth: 0.5,
+                            borderColor: primaryColor,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}>
+                            <Text style={{ fontSize: 10, fontWeight: 'black', color: '#111' }} render={({ pageNumber }) => `${pageNumber}`} />
+                        </View>
+                    </View>
+                </View>
+
+                {/* Right Decoration */}
+                <View style={tw("flex-row items-center justify-end")}>
+                    <View style={tw("rotate-180")}>
+                        <Text style={{ fontSize: 18, fontWeight: 'black', color: primaryColor, opacity: 0.8 }}>{'>>'}</Text>
+                    </View>
+                </View>
             </View>
         );
     }

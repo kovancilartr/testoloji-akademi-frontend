@@ -63,6 +63,11 @@ export function AppSidebar({ className, userDropdownSide = "right" }: SidebarPro
                     icon: BookOpen,
                 },
                 {
+                    label: "Test Merkezi",
+                    href: "/dashboard/projects",
+                    icon: FolderOpen,
+                },
+                {
                     label: "Ayarlar",
                     href: "/dashboard/admin/settings",
                     icon: Settings,
@@ -91,7 +96,7 @@ export function AppSidebar({ className, userDropdownSide = "right" }: SidebarPro
     ];
 
     const teacherCoachingMenu = {
-        title: "Akademi (Koçluk)",
+        title: "Akademik (Koçluk)",
         items: [
             {
                 label: "Kurslar",

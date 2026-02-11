@@ -49,40 +49,120 @@ export const TemplateHeader = ({ template, settings, projectName, primaryColor, 
     }
 
     if (template === 'compact') {
+        const testText = settings?.subtitle || 'GENEL TEKRAR';
         return (
-            <View style={tw("absolute top-[10px] left-[15px] right-[15px] h-[45px] flex-row items-center")} fixed>
-                <View style={tw("flex-1 h-[1px] bg-gray-200")} />
-                <View style={tw("px-4 items-center")}>
-                    <View style={tw("flex-row items-center gap-2 mb-1")}>
-                        <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: primaryColor }} />
-                        <Text style={{ fontSize: 7, fontWeight: 'black', color: primaryColor, fontFamily: 'Oswald', letterSpacing: 2 }}>TEST {currentTest}</Text>
-                        <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: primaryColor }} />
+            <View style={tw("absolute top-[15px] left-[15px] right-[15px] h-[55px] flex-row items-center")} fixed>
+                {/* Left: Pill Content */}
+                <View style={tw("flex-1")}>
+                    <View style={tw("border border-gray-300 rounded-full px-4 py-1.5 self-start mb-1")}>
+                        <Text style={tw("text-[9px] font-black text-gray-800 uppercase tracking-tight")}>
+                            {settings?.title || projectName} <Text style={tw("text-gray-300 mx-1")}>|</Text> TEST {currentTest}
+                        </Text>
                     </View>
-                    <Text style={tw("text-[10px] font-black text-gray-900 uppercase tracking-[2px]")}>{settings?.title || projectName}</Text>
+                    <Text style={{ fontSize: 9, fontWeight: 'bold', color: primaryColor, letterSpacing: 0.5, marginLeft: 15 }}>
+                        {testText}
+                    </Text>
                 </View>
-                <View style={tw("flex-1 h-[1px] bg-gray-200")} />
+
+                {/* Center: QR Code Block */}
+                <View style={tw("items-center mx-4")}>
+                    <View style={[tw("p-1 border-[1.5pt] rounded-lg bg-white"), { borderColor: primaryColor }]}>
+                        {settings?.qrCodeUrl ? (
+                            <Image
+                                src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(settings.qrCodeUrl)}`}
+                                style={tw("w-10 h-10")}
+                            />
+                        ) : (
+                            <View style={[tw("w-10 h-10 items-center justify-center bg-gray-50"), { backgroundColor: `${primaryColor}15` }]}>
+                                <Text style={{ fontSize: 6, color: primaryColor, fontWeight: 'black' }}>QR</Text>
+                            </View>
+                        )}
+                    </View>
+                </View>
+
+                {/* Right: Branding Content */}
+                <View style={tw("flex-1 items-end pr-2")}>
+                    <View style={tw("items-end mb-1")}>
+                        <Text style={tw("text-[9px] font-black text-gray-800 uppercase")}>
+                            ONLINE DERS <Text style={tw("text-gray-300 mx-1")}>|</Text> MATEMATİK
+                        </Text>
+                        <Text style={tw("text-[6px] font-bold text-gray-400 mt-0.5")}>
+                            "Öğrenilmemiş konu kalmayacak..."
+                        </Text>
+                    </View>
+                </View>
+
+                {/* Far Right: Circular Logo */}
+                <View style={tw("w-12 h-12 rounded-full border border-gray-100 items-center justify-center overflow-hidden bg-gray-50 ml-2")}>
+                    <View style={[tw("w-full h-full items-center justify-center"), { backgroundColor: primaryColor }]}>
+                        <Text style={tw("text-white text-[10px] font-black")}>T</Text>
+                    </View>
+                </View>
             </View>
         );
     }
 
     if (template === 'elegant') {
+        const testText = `TEST-${currentTest}`;
         return (
-            <View style={tw("absolute top-[20px] left-[20px] right-[20px] items-center")} fixed>
-                <View style={tw("w-full h-[0.5pt] bg-gray-300 mb-2")} />
-                <View style={tw("flex-row items-center justify-between w-full px-4")}>
-                    <Text style={tw("text-[8px] font-bold text-gray-400 uppercase tracking-[3px]")}>{settings?.schoolName || 'Testoloji Elite'}</Text>
-                    <View style={tw("items-center")}>
-                        <Text style={{ fontSize: 14, fontWeight: 'black', color: '#111', fontFamily: 'Montserrat', textTransform: 'uppercase', letterSpacing: 4 }}>{settings?.title || projectName}</Text>
+            <View style={tw("absolute top-0 left-0 right-0 h-[65px]")} fixed>
+                {/* Blue Top Ribbon */}
+                <View style={[tw("absolute top-0 left-0 w-full h-[6px]"), { backgroundColor: primaryColor }]} />
+
+                <View style={tw("flex-row items-start px-0")}>
+                    {/* Left Branding Block */}
+                    <View style={{
+                        width: 90,
+                        backgroundColor: primaryColor,
+                        paddingTop: 12,
+                        paddingBottom: 15,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderBottomRightRadius: 15,
+                        position: 'relative'
+                    }}>
+                        {/* Double Arrow Decoration */}
+                        <View style={{ position: 'absolute', top: 15, left: -2, opacity: 0.3 }}>
+                            <Text style={{ fontSize: 24, fontWeight: 'bold', color: 'white' }}>{">>"}</Text>
+                        </View>
+
+                        <Text style={{ fontSize: 13, fontWeight: 'black', color: 'white', fontFamily: 'Montserrat' }}>{testText}</Text>
+                        <View style={{
+                            backgroundColor: 'white',
+                            borderRadius: 10,
+                            paddingHorizontal: 6,
+                            paddingVertical: 2,
+                            marginTop: 5,
+                            borderWidth: 1.5,
+                            borderColor: '#1e3a8a',
+                        }}>
+                            <Text style={{ fontSize: 6, fontWeight: 'black', color: primaryColor, textAlign: 'center' }}>KAZANIM TESTİ</Text>
+                        </View>
+                    </View>
+
+                    {/* Right Title Block */}
+                    <View style={tw("flex-1 pt-8 pr-12 items-end")}>
+                        <View style={tw("bg-gray-100 rounded-lg px-8 py-2 w-[300px] items-end")}>
+                            <Text style={tw("text-gray-800 text-[10px] font-black uppercase tracking-widest")}>
+                                {settings?.title || projectName}
+                            </Text>
+                        </View>
                         {settings?.subtitle && (
-                            <Text style={{ fontSize: 6, fontWeight: 'bold', color: primaryColor, marginTop: 2, letterSpacing: 2, textTransform: 'uppercase' }}>{settings.subtitle}</Text>
+                            <View style={tw("flex-row items-center gap-1 mt-1")}>
+                                <Text style={{ fontSize: 6, fontWeight: 'black', color: primaryColor, opacity: 0.8 }}>{">>"}</Text>
+                                <Text style={{
+                                    fontSize: 7,
+                                    fontWeight: 'black',
+                                    color: '#9ca3af',
+                                    letterSpacing: 1,
+                                    textTransform: 'uppercase'
+                                }}>
+                                    {settings.subtitle}
+                                </Text>
+                            </View>
                         )}
                     </View>
-                    <View style={tw("items-end")}>
-                        <Text style={{ fontSize: 7, fontWeight: 'black', color: primaryColor }}>N° {currentTest}</Text>
-                        <Text style={tw("text-[6px] font-bold text-gray-300 uppercase")}>Premium Series</Text>
-                    </View>
                 </View>
-                <View style={tw("w-full h-[0.5pt] bg-gray-300 mt-2")} />
             </View>
         );
     }

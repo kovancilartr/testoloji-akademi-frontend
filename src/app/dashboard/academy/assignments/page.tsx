@@ -5,7 +5,7 @@ import { useAssignments, useDeleteAssignment } from "@/hooks/use-assignments";
 import { useStudents } from "@/hooks/use-students";
 import { useProjects } from "@/hooks/use-projects";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, Search, BookOpen, Clock, Video, FileText, Calendar as CalendarIcon, MoreVertical, Eye, Pencil } from "lucide-react";
+import { Plus, Trash2, Search, BookOpen, Clock, Video, FileText, Calendar as CalendarIcon, MoreVertical, Eye, Pencil, ChevronLeft, ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
     Table,
@@ -38,11 +38,19 @@ export default function AssignmentsPage() {
 
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
 
     const filteredAssignments = assignments?.filter(a =>
         a.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         a.student.name.toLowerCase().includes(searchTerm.toLowerCase())
     ) || [];
+
+    const totalPages = Math.ceil(filteredAssignments.length / itemsPerPage);
+    const paginatedAssignments = filteredAssignments.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
 
     const handleDelete = async (id: string) => {
         if (confirm("Bu ödevi silmek istediğinize emin misiniz?")) {
@@ -134,14 +142,14 @@ export default function AssignmentsPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {filteredAssignments.length === 0 ? (
+                                {paginatedAssignments.length === 0 ? (
                                     <TableRow>
                                         <TableCell colSpan={6} className="h-32 text-center text-gray-500">
                                             {searchTerm ? 'Sonuç bulunamadı' : 'Henüz ödev oluşturulmamış.'}
                                         </TableCell>
                                     </TableRow>
                                 ) : (
-                                    filteredAssignments.map((assignment) => (
+                                    paginatedAssignments.map((assignment) => (
                                         <TableRow key={assignment.id} className="hover:bg-gray-50/50 transition-colors">
                                             <TableCell>
                                                 <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center">
@@ -177,7 +185,7 @@ export default function AssignmentsPage() {
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    className="h-8 w-8 text-gray-400 hover:text-red-600"
+                                                    className="h-8 w-8 text-gray-400 hover:text-red-600 cursor-pointer"
                                                     onClick={() => handleDelete(assignment.id)}
                                                 >
                                                     <Trash2 className="w-4 h-4" />
@@ -188,63 +196,135 @@ export default function AssignmentsPage() {
                                 )}
                             </TableBody>
                         </Table>
+
+                        {/* Pagination */}
+                        {filteredAssignments.length > itemsPerPage && (
+                            <div className="px-6 py-4 bg-gray-50/50 border-t border-gray-100 flex items-center justify-between">
+                                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                                    Gösterilen: {(currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, filteredAssignments.length)} / Toplam: {filteredAssignments.length}
+                                </p>
+                                <div className="flex items-center gap-1">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        disabled={currentPage === 1}
+                                        onClick={() => setCurrentPage(prev => prev - 1)}
+                                        className="h-8 w-8 p-0 rounded-lg border-gray-200 text-gray-600 disabled:opacity-30 cursor-pointer hover:bg-white"
+                                    >
+                                        <ChevronLeft className="w-4 h-4" />
+                                    </Button>
+                                    {Array.from({ length: totalPages }).map((_, i) => (
+                                        <Button
+                                            key={i}
+                                            variant={currentPage === i + 1 ? "default" : "outline"}
+                                            size="sm"
+                                            onClick={() => setCurrentPage(i + 1)}
+                                            className={cn(
+                                                "h-8 w-8 p-0 rounded-lg font-bold text-xs border-gray-200 cursor-pointer shadow-sm mx-0.5",
+                                                currentPage === i + 1 ? cn(colors.buttonBg, colors.buttonHover, "text-white border-transparent shadow-md shadow-gray-200") : "text-gray-600 bg-white hover:border-gray-300"
+                                            )}
+                                        >
+                                            {i + 1}
+                                        </Button>
+                                    ))}
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        disabled={currentPage === totalPages}
+                                        onClick={() => setCurrentPage(prev => prev + 1)}
+                                        className="h-8 w-8 p-0 rounded-lg border-gray-200 text-gray-600 disabled:opacity-30 cursor-pointer hover:bg-white"
+                                    >
+                                        <ChevronRight className="w-4 h-4" />
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Mobile Card View */}
                     <div className="md:hidden grid grid-cols-1 gap-4">
-                        {filteredAssignments.length === 0 ? (
+                        {paginatedAssignments.length === 0 ? (
                             <div className="text-center text-gray-500 py-10 bg-white rounded-xl border border-gray-100">
                                 {searchTerm ? 'Sonuç bulunamadı' : 'Henüz ödev oluşturulmamış.'}
                             </div>
                         ) : (
-                            filteredAssignments.map((assignment) => (
-                                <div key={assignment.id} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm space-y-3">
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center shrink-0">
-                                                {getTypeIcon(assignment.type)}
+                            <div className="space-y-4">
+                                {paginatedAssignments.map((assignment) => (
+                                    <div key={assignment.id} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm space-y-3">
+                                        <div className="flex items-start justify-between">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center shrink-0">
+                                                    {getTypeIcon(assignment.type)}
+                                                </div>
+                                                <div>
+                                                    <h3 className="font-bold text-gray-900 line-clamp-1">{assignment.title}</h3>
+                                                    <p className="text-xs text-gray-500 line-clamp-1">
+                                                        {assignment.type === 'TEST' && assignment.project ? assignment.project.name : assignment.description || '-'}
+                                                    </p>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <h3 className="font-bold text-gray-900 line-clamp-1">{assignment.title}</h3>
-                                                <p className="text-xs text-gray-500 line-clamp-1">
-                                                    {assignment.type === 'TEST' && assignment.project ? assignment.project.name : assignment.description || '-'}
-                                                </p>
-                                            </div>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="-mr-2 h-8 w-8">
+                                                        <MoreVertical className="w-4 h-4 text-gray-400" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(assignment.id)}>
+                                                        <Trash2 className="w-4 h-4 mr-2" />
+                                                        Sil
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
                                         </div>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="icon" className="-mr-2 h-8 w-8">
-                                                    <MoreVertical className="w-4 h-4 text-gray-400" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(assignment.id)}>
-                                                    <Trash2 className="w-4 h-4 mr-2" />
-                                                    Sil
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </div>
 
-                                    <div className="flex items-center justify-between pt-2 border-t border-gray-50">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-[10px] font-bold shrink-0">
-                                                {assignment.student.name.charAt(0)}
+                                        <div className="flex items-center justify-between pt-2 border-t border-gray-50">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-[10px] font-bold shrink-0">
+                                                    {assignment.student.name.charAt(0)}
+                                                </div>
+                                                <span className="text-sm font-medium text-gray-700 truncate max-w-[120px]">
+                                                    {assignment.student.name}
+                                                </span>
                                             </div>
-                                            <span className="text-sm font-medium text-gray-700 truncate max-w-[120px]">
-                                                {assignment.student.name}
-                                            </span>
+                                            <div className="flex items-center gap-1 text-xs text-gray-500">
+                                                <Clock className="w-3 h-3" />
+                                                {formatDate(assignment.dueDate)}
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-1 text-xs text-gray-500">
-                                            <Clock className="w-3 h-3" />
-                                            {formatDate(assignment.dueDate)}
+                                        <div className="flex justify-end">
+                                            {getStatusBadge(assignment.status)}
                                         </div>
                                     </div>
-                                    <div className="flex justify-end">
-                                        {getStatusBadge(assignment.status)}
+                                ))}
+
+                                {/* Mobile Pagination */}
+                                {filteredAssignments.length > itemsPerPage && (
+                                    <div className="flex items-center justify-center gap-2 pt-2">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={currentPage === 1}
+                                            onClick={() => setCurrentPage(prev => prev - 1)}
+                                            className="h-9 w-9 p-0 rounded-xl"
+                                        >
+                                            <ChevronLeft className="w-4 h-4" />
+                                        </Button>
+                                        <span className="text-xs font-bold text-gray-500">
+                                            {currentPage} / {totalPages}
+                                        </span >
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={currentPage === totalPages}
+                                            onClick={() => setCurrentPage(prev => prev + 1)}
+                                            className="h-9 w-9 p-0 rounded-xl"
+                                        >
+                                            <ChevronRight className="w-4 h-4" />
+                                        </Button>
                                     </div>
-                                </div>
-                            ))
+                                )}
+                            </div>
                         )}
                     </div>
                 </div>

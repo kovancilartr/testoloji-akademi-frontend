@@ -7,40 +7,109 @@ export const CoverPage = ({ settings, projectName, primaryColor }: any) => {
 
     if (template === 'modern_gradient') {
         return (
-            <Page size="A4" style={tw("bg-white flex flex-col items-center justify-between p-20")}>
+            <Page size="A4" style={tw("bg-white flex flex-col items-center p-10")}>
+                {/* Decorative Background Elements */}
                 <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: -1 }}>
-                    <View style={{ width: '100%', height: '100%', backgroundColor: primaryColor, opacity: 0.03 }} />
-                    <View style={{ position: 'absolute', top: -100, right: -100, width: 400, height: 400, borderRadius: 200, backgroundColor: primaryColor, opacity: 0.1 }} />
-                    <View style={{ position: 'absolute', bottom: -150, left: -150, width: 500, height: 500, borderRadius: 250, backgroundColor: primaryColor, opacity: 0.05 }} />
+                    <View style={{ width: '100%', height: '100%', backgroundColor: primaryColor, opacity: 0.02 }} />
+                    <View style={{ position: 'absolute', top: -50, right: -50, width: 300, height: 300, borderRadius: 150, backgroundColor: primaryColor, opacity: 0.05 }} />
                 </View>
 
-                <View style={tw("items-center mt-20")}>
-                    <View style={{ ...tw("w-24 h-24 rounded-3xl items-center justify-center mb-10"), backgroundColor: primaryColor }}>
-                        <Text style={tw("text-white text-4xl font-black")}>T</Text>
+                {/* Top Right: QR Code Block */}
+                <View style={tw("absolute top-10 right-10 items-center")}>
+                    <View style={[tw("px-3 py-1 rounded-t-lg"), { backgroundColor: primaryColor }]}>
+                        <Text style={tw("text-white text-[8px] font-black")}>VİDEO DERSLER</Text>
                     </View>
-                    <Text style={{ ...tw("text-4xl font-black uppercase text-center mb-4"), color: primaryColor }}>{settings?.coverTitle || projectName}</Text>
-                    <View style={{ width: 60, height: 6, backgroundColor: primaryColor, borderRadius: 3 }} />
-                </View>
-
-                <View style={tw("items-center mb-20")}>
-                    <Text style={tw("text-gray-400 text-sm font-bold uppercase tracking-[8px] mb-2")}>SORU BANKASI</Text>
-                    <Text style={tw("text-gray-600 text-lg font-bold uppercase tracking-widest")}>{settings?.schoolName || 'Eğitim Serisi'}</Text>
-                    {settings?.authorName && (
-                        <Text style={tw("text-gray-400 text-xs font-bold mt-4 uppercase")}>Hazırlayan: {settings.authorName}</Text>
-                    )}
-                </View>
-
-                <View style={tw("w-full border-t border-gray-100 pt-10 flex-row justify-between items-end")}>
-                    <View>
-                        <Text style={tw("text-[10px] font-black text-gray-300 uppercase tracking-widest")}>TESTOLOJİ AI ENGINE</Text>
-                        <Text style={tw("text-[8px] font-bold text-gray-400 mt-1 uppercase")}>Professional Edition</Text>
+                    <View style={[tw("p-1 border-[1.5pt] rounded-b-lg bg-white"), { borderColor: primaryColor }]}>
+                        {settings?.qrCodeUrl ? (
+                            <Image
+                                src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(settings.qrCodeUrl)}`}
+                                style={tw("w-14 h-14")}
+                            />
+                        ) : (
+                            <View style={tw("w-14 h-14 bg-gray-50 items-center justify-center")}>
+                                <Text style={tw("text-[6px] text-gray-400 capitalize")}>QR Kod</Text>
+                            </View>
+                        )}
                     </View>
-                    {settings?.qrCodeUrl && (
-                        <Image
-                            src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(settings.qrCodeUrl)}`}
-                            style={tw("w-16 h-16")}
-                        />
-                    )}
+                </View>
+
+                {/* Main Content Area */}
+                <View style={tw("mt-16 items-center w-full")}>
+                    {/* Main Title Group */}
+                    <View style={tw("items-center mb-6")}>
+                        <Text style={{ fontSize: 40, fontWeight: 900, color: primaryColor, fontFamily: 'Montserrat', textAlign: 'center', textTransform: 'uppercase' }}>
+                            {settings?.coverTitle || projectName}
+                        </Text>
+                        <Text style={tw("text-gray-900 text-2xl font-black uppercase mt-1 tracking-[4px]")}>VİDEO DERS KİTABI</Text>
+                    </View>
+
+                    {/* Author Portrait Section */}
+                    <View style={tw("relative my-8 items-center")}>
+                        <View style={{
+                            width: 170,
+                            height: 170,
+                            borderRadius: 85,
+                            borderWidth: 8,
+                            borderColor: primaryColor,
+                            padding: 4,
+                            backgroundColor: 'white',
+                            overflow: 'hidden',
+                        }}>
+                            <View style={{
+                                width: '100%',
+                                height: '100%',
+                                borderRadius: 75,
+                                backgroundColor: `${primaryColor}15`,
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}>
+                                <Text style={{ fontSize: 40, fontWeight: 900, color: primaryColor }}>
+                                    {settings?.authorName ? settings.authorName[0] : 'A'}
+                                </Text>
+                            </View>
+                        </View>
+
+                        {/* Author Name Badge */}
+                        <View style={[tw("absolute -bottom-2 px-8 py-2 rounded-full"), { backgroundColor: primaryColor }]}>
+                            <Text style={tw("text-white text-[9px] font-black uppercase tracking-widest")}>
+                                {settings?.authorName || 'EĞİTMEN ADI'}
+                            </Text>
+                        </View>
+                    </View>
+
+                    {/* Campaign/Subtitle Block */}
+                    <View style={tw("mt-12 items-center")}>
+                        <View style={[tw("px-14 py-4 rounded-2xl"), { backgroundColor: primaryColor }]}>
+                            <Text style={tw("text-white text-2xl font-black text-center uppercase tracking-tighter")}>
+                                {settings?.subtitle || 'GENEL TEKRAR KAMPI'}
+                            </Text>
+                        </View>
+                    </View>
+                </View>
+
+                {/* Footer Section */}
+                <View style={tw("absolute bottom-20 w-full items-center")}>
+                    {/* YouTube Branding */}
+                    <View style={[tw("flex-row items-center gap-2 px-4 py-2 rounded-lg mb-6"), { backgroundColor: primaryColor }]}>
+                        <View style={tw("w-6 h-6 bg-white rounded-full items-center justify-center")}>
+                            <Text style={{ color: primaryColor, fontSize: 10, fontWeight: 'black' }}>▶</Text>
+                        </View>
+                        <Text style={tw("text-white text-[9px] font-black")}>YouTube Anlatımlı</Text>
+                    </View>
+
+                    <Text style={tw("text-gray-500 text-[14px] font-bold italic mb-2")}>
+                        "Öğrenilmemiş konu kalmayacak..."
+                    </Text>
+                    <Text style={tw("text-gray-400 text-[10px] font-bold")}>
+                        {settings?.schoolName || 'Testoloji Akademi'} desteğiyle...
+                    </Text>
+                </View>
+
+                {/* Bottom Logo */}
+                <View style={tw("absolute bottom-10 left-10")}>
+                    <View style={tw("w-10 h-10 border-2 border-gray-100 rounded-lg items-center justify-center opacity-40")}>
+                        <Text style={tw("text-gray-800 font-black")}>T</Text>
+                    </View>
                 </View>
             </Page>
         );
@@ -72,6 +141,114 @@ export const CoverPage = ({ settings, projectName, primaryColor }: any) => {
 
                 <View style={tw("ml-40 mb-10 border-t border-gray-100 pt-10")}>
                     <Text style={tw("text-gray-400 font-bold uppercase text-[8px] tracking-[4px]")}>TESTOLOJİ AI SOLUTIONS</Text>
+                </View>
+            </Page>
+        );
+    }
+
+    if (template === 'premium_vdk') {
+        return (
+            <Page size="A4" style={tw("bg-white flex flex-col items-center p-10")}>
+                {/* Top Right: QR Code Block */}
+                <View style={tw("absolute top-10 right-10 items-center")}>
+                    <View style={[tw("bg-blue-900 px-3 py-1 rounded-t-lg"), { backgroundColor: '#1e3a8a' }]}>
+                        <Text style={tw("text-white text-[8px] font-black")}>VİDEO DERSLER</Text>
+                    </View>
+                    <View style={tw("p-1 border-[1.5pt] border-blue-900 rounded-b-lg")}>
+                        {settings?.qrCodeUrl ? (
+                            <Image
+                                src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(settings.qrCodeUrl)}`}
+                                style={tw("w-16 h-16")}
+                            />
+                        ) : (
+                            <View style={tw("w-16 h-16 bg-gray-100 items-center justify-center")}>
+                                <Text style={tw("text-[6px] text-gray-400 capitalize")}>QR Kod</Text>
+                            </View>
+                        )}
+                    </View>
+                </View>
+
+                {/* Main Content Area */}
+                <View style={tw("mt-20 items-center w-full")}>
+                    {/* Main Title Group */}
+                    <View style={tw("items-center mb-8")}>
+                        <Text style={{ fontSize: 60, fontWeight: 900, color: '#1e3a8a', fontFamily: 'Montserrat', textAlign: 'center' }}>
+                            {settings?.coverTitle || projectName}
+                        </Text>
+                        <Text style={tw("text-gray-900 text-3xl font-black uppercase mt-2 tracking-widest")}>VİDEO DERS KİTABI</Text>
+                    </View>
+
+                    {/* Author Portrait Section */}
+                    <View style={tw("relative my-10 items-center")}>
+                        <View style={{
+                            width: 180,
+                            height: 180,
+                            borderRadius: 90,
+                            borderWidth: 10,
+                            borderColor: '#1e3a8a',
+                            padding: 5,
+                            backgroundColor: 'white',
+                            overflow: 'hidden',
+                            position: 'relative'
+                        }}>
+                            <View style={{
+                                width: '100%',
+                                height: '100%',
+                                borderRadius: 75,
+                                backgroundColor: primaryColor,
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}>
+                                <Text style={tw("text-white text-5xl font-black")}>
+                                    {settings?.authorName ? settings.authorName[0] : 'T'}
+                                </Text>
+                            </View>
+                        </View>
+                        {/* Circular Text Border (Simplified) */}
+                        <View style={tw("absolute -top-4 -bottom-4 -left-4 -right-4 border border-gray-200 rounded-full opacity-20")} />
+
+                        {/* Author Name Badge */}
+                        <View style={[tw("absolute -bottom-2 bg-blue-900 px-6 py-2 rounded-full"), { backgroundColor: '#1e3a8a' }]}>
+                            <Text style={tw("text-white text-[10px] font-black uppercase tracking-widest")}>
+                                {settings?.authorName || 'EĞİTMEN ADI'}
+                            </Text>
+                        </View>
+                    </View>
+
+                    {/* Campaign Title Block */}
+                    <View style={tw("mt-10 items-center")}>
+                        <View style={tw("relative px-12 py-4")}>
+                            {/* Layered Text for Shadow Effect */}
+                            <Text style={{ fontSize: 36, fontWeight: 900, color: 'white', textAlign: 'center', backgroundColor: primaryColor, paddingHorizontal: 20, paddingVertical: 10, borderRadius: 15 }}>
+                                {settings?.subtitle || '60 DERSTE TYT KAMPI'}
+                            </Text>
+                        </View>
+                    </View>
+                </View>
+
+                {/* Footer Section */}
+                <View style={tw("absolute bottom-20 w-full items-center")}>
+                    {/* YouTube Branding */}
+                    <View style={[tw("flex-row items-center gap-2 bg-blue-900 px-4 py-2 rounded-lg mb-6"), { backgroundColor: '#1e3a8a' }]}>
+                        <View style={tw("w-6 h-6 bg-white rounded-full items-center justify-center")}>
+                            <Text style={{ color: '#1e3a8a', fontSize: 10, fontWeight: 'black' }}>▶</Text>
+                        </View>
+                        <Text style={tw("text-white text-[10px] font-black")}>YouTube Anlatımlı</Text>
+                    </View>
+
+                    <Text style={tw("text-gray-400 text-[14px] font-bold italic mb-2")}>
+                        "Öğrenilmemiş konu kalmayacak..."
+                    </Text>
+                    <Text style={tw("text-gray-300 text-[10px] font-bold")}>
+                        {settings?.schoolName || 'Testoloji Akademi Yayınları'} desteğiyle...
+                    </Text>
+                </View>
+
+                {/* Bottom Logo */}
+                <View style={tw("absolute bottom-10 left-10")}>
+                    <View style={tw("w-12 h-12 border-2 border-gray-100 rounded-lg items-center justify-center opacity-30")}>
+                        <Text style={tw("text-gray-900 font-bold")}>M</Text>
+                    </View>
                 </View>
             </Page>
         );

@@ -14,8 +14,20 @@ import {
     XCircle,
     Info,
     Calendar,
-    BarChart3
+    BarChart3,
+    ChevronLeft,
+    ChevronRight,
+    ArrowRight
 } from "lucide-react";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import {
     LineChart,
     Line,
@@ -44,6 +56,8 @@ interface StudentAnalyticsViewProps {
 export function StudentAnalyticsView({ studentId }: StudentAnalyticsViewProps) {
     const { data: analytics, isLoading } = useStudentAnalytics(studentId);
     const [selectedExam, setSelectedExam] = useState<any>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 5;
 
     if (isLoading) return <div className="h-40 flex items-center justify-center font-bold text-slate-400 animate-pulse">Analiz verileri yükleniyor...</div>;
     if (!analytics) return <div className="p-8 text-center text-slate-400">Analiz verisi bulunamadı.</div>;
@@ -251,47 +265,126 @@ export function StudentAnalyticsView({ studentId }: StudentAnalyticsViewProps) {
                     <Target className="w-6 h-6 text-emerald-500" />
                     Sınav Sonuç Detayları
                 </h3>
-                <div className="grid grid-cols-1 gap-4">
-                    {analytics.scoreHistory.map(exam => (
-                        <Card
-                            key={exam.id}
-                            className="border-none shadow-lg bg-white rounded-2xl overflow-hidden hover:ring-2 hover:ring-emerald-100 transition-all group cursor-pointer active:scale-[0.98]"
-                            onClick={() => setSelectedExam(exam)}
-                        >
-                            <CardContent className="p-6 flex flex-col md:flex-row items-center justify-between gap-6">
-                                <div className="flex items-center gap-4 flex-1">
-                                    <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 group-hover:scale-110 transition-transform">
-                                        <Calendar className="w-6 h-6" />
-                                    </div>
-                                    <div>
-                                        <h4 className="font-black text-slate-900">{exam.title}</h4>
-                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                                            {new Date(exam.date).toLocaleDateString("tr-TR", { day: 'numeric', month: 'long', year: 'numeric' })}
-                                        </p>
-                                    </div>
-                                </div>
+                <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl overflow-hidden">
+                    <Table>
+                        <TableHeader className="bg-slate-50/50">
+                            <TableRow className="hover:bg-transparent border-slate-100">
+                                <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 pl-8 h-14">Sınav / Deneme Adı</TableHead>
+                                <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">Tarih</TableHead>
+                                <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 text-center">D / Y / N</TableHead>
+                                <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 text-center">Başarı</TableHead>
+                                <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 text-right pr-8">İşlem</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {analytics.scoreHistory.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={5} className="h-32 text-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">
+                                        Henüz bir sınav sonucu bulunmuyor.
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                analytics.scoreHistory.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((exam) => (
+                                    <TableRow
+                                        key={exam.id}
+                                        className="hover:bg-slate-50/50 transition-all group cursor-pointer border-slate-50"
+                                        onClick={() => setSelectedExam(exam)}
+                                    >
+                                        <TableCell className="pl-8 py-4">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 group-hover:scale-110 group-hover:bg-white group-hover:text-emerald-500 transition-all border border-slate-100">
+                                                    <Calendar className="w-5 h-5" />
+                                                </div>
+                                                <span className="font-black text-slate-900 tracking-tight">{exam.title}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">
+                                                {new Date(exam.date).toLocaleDateString("tr-TR", { day: 'numeric', month: 'long', year: 'numeric' })}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell className="text-center">
+                                            <div className="flex items-center justify-center gap-3">
+                                                <div className="flex flex-col">
+                                                    <span className="text-[9px] font-black text-slate-300 uppercase">D</span>
+                                                    <span className="text-sm font-black text-emerald-600">{exam.correctCount}</span>
+                                                </div>
+                                                <div className="w-px h-6 bg-slate-100" />
+                                                <div className="flex flex-col">
+                                                    <span className="text-[9px] font-black text-slate-300 uppercase">Y</span>
+                                                    <span className="text-sm font-black text-rose-500">{exam.wrongCount}</span>
+                                                </div>
+                                                <div className="w-px h-6 bg-slate-100" />
+                                                <div className="flex flex-col">
+                                                    <span className="text-[9px] font-black text-slate-300 uppercase">N</span>
+                                                    <span className="text-sm font-black text-indigo-600 font-mono">{exam.netCount}</span>
+                                                </div>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="text-center">
+                                            <div className="inline-flex flex-col bg-slate-900 text-white px-3 py-1.5 rounded-xl shadow-lg shadow-slate-200">
+                                                <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest leading-none mb-0.5">PUAN</span>
+                                                <span className="text-xs font-black italic">%{exam.grade}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="text-right pr-8">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="font-black text-[10px] uppercase tracking-widest text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-full px-4 h-8 transition-all"
+                                            >
+                                                Analiz
+                                                <ArrowRight className="w-3 h-3 ml-2 group-hover:translate-x-1 transition-transform" />
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
 
-                                <div className="flex items-center gap-8 md:gap-12 shrink-0">
-                                    <div className="text-center">
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter mb-1">Doğru</p>
-                                        <p className="text-xl font-black text-emerald-600">{exam.correctCount}</p>
-                                    </div>
-                                    <div className="text-center">
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter mb-1">Yanlış</p>
-                                        <p className="text-xl font-black text-rose-500">{exam.wrongCount}</p>
-                                    </div>
-                                    <div className="text-center">
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter mb-1">Net</p>
-                                        <p className="text-xl font-black text-indigo-600">{exam.netCount}</p>
-                                    </div>
-                                    <div className="text-center bg-slate-900 text-white px-4 py-2 rounded-xl shadow-lg">
-                                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Puan</p>
-                                        <p className="text-lg font-black italic">%{exam.grade}</p>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
+                    {/* Pagination */}
+                    {analytics.scoreHistory.length > itemsPerPage && (
+                        <div className="p-6 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                                GÖSTERİLEN: {(currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, analytics.scoreHistory.length)} / TOPLAM: {analytics.scoreHistory.length}
+                            </p>
+                            <div className="flex items-center gap-1.5">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={currentPage === 1}
+                                    onClick={(e) => { e.stopPropagation(); setCurrentPage(prev => prev - 1); }}
+                                    className="h-9 w-9 p-0 rounded-xl border-slate-200 text-slate-600 disabled:opacity-30 hover:bg-white hover:shadow-md transition-all cursor-pointer"
+                                >
+                                    <ChevronLeft className="w-4 h-4" />
+                                </Button>
+                                {Array.from({ length: Math.ceil(analytics.scoreHistory.length / itemsPerPage) }).map((_, i) => (
+                                    <Button
+                                        key={i}
+                                        variant={currentPage === i + 1 ? "default" : "outline"}
+                                        size="sm"
+                                        onClick={(e) => { e.stopPropagation(); setCurrentPage(i + 1); }}
+                                        className={cn(
+                                            "h-9 w-9 p-0 rounded-xl font-black text-[11px] transition-all cursor-pointer shadow-sm",
+                                            currentPage === i + 1 ? "bg-slate-900 text-white border-transparent scale-110 shadow-lg shadow-slate-200" : "text-slate-600 bg-white border-slate-200 hover:border-slate-300"
+                                        )}
+                                    >
+                                        {i + 1}
+                                    </Button>
+                                ))}
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={currentPage === Math.ceil(analytics.scoreHistory.length / itemsPerPage)}
+                                    onClick={(e) => { e.stopPropagation(); setCurrentPage(prev => prev + 1); }}
+                                    className="h-9 w-9 p-0 rounded-xl border-slate-200 text-slate-600 disabled:opacity-30 hover:bg-white hover:shadow-md transition-all cursor-pointer"
+                                >
+                                    <ChevronRight className="w-4 h-4" />
+                                </Button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 

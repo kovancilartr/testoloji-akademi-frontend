@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useStudents, useCreateStudent, useDeleteStudent, Student } from "@/hooks/use-students";
 import { EditStudentDialog } from "@/components/ui/custom-ui/dashboard-components/EditStudentDialog";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, Search, User, GraduationCap, Eye, Users, Pencil, Mail, Phone } from "lucide-react";
+import { Plus, Trash2, Search, User, GraduationCap, Eye, Users, Pencil, Mail, Phone, ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import {
@@ -31,6 +31,14 @@ import { cn } from "@/lib/utils";
 import { useThemeColors } from "@/contexts/ThemeContext";
 import { RoleProtect } from "@/components/providers/RoleProtect";
 import { Role } from "@/types/auth";
+import { GRADE_LEVELS } from "@/lib/constants";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 export default function StudentsPage() {
     const { data: students, isLoading } = useStudents();
@@ -51,11 +59,19 @@ export default function StudentsPage() {
 
     const [studentToEdit, setStudentToEdit] = useState<Student | null>(null);
     const [isEditOpen, setIsEditOpen] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
 
     const filteredStudents = students?.filter(s =>
         s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         s.email?.toLowerCase().includes(searchTerm.toLowerCase())
     ) || [];
+
+    const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
+    const paginatedStudents = filteredStudents.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
 
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -126,12 +142,21 @@ export default function StudentsPage() {
 
                                 <div className="space-y-2">
                                     <Label htmlFor="grade">Sınıf / Seviye</Label>
-                                    <Input
-                                        id="grade"
+                                    <Select
                                         value={formData.gradeLevel}
-                                        onChange={e => setFormData({ ...formData, gradeLevel: e.target.value })}
-                                        placeholder="Örn: 12. Sınıf, Mezun"
-                                    />
+                                        onValueChange={value => setFormData({ ...formData, gradeLevel: value })}
+                                    >
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Sınıf seçin" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {GRADE_LEVELS.map((grade) => (
+                                                <SelectItem key={grade} value={grade}>
+                                                    {grade}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
@@ -201,14 +226,14 @@ export default function StudentsPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {filteredStudents.length === 0 ? (
+                            {paginatedStudents.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={6} className="h-32 text-center text-gray-500">
                                         {searchTerm ? 'Sonuç bulunamadı' : 'Henüz öğrenci eklenmemiş.'}
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                filteredStudents.map((student) => (
+                                paginatedStudents.map((student) => (
                                     <TableRow key={student.id} className="hover:bg-gray-50/50 transition-colors">
                                         <TableCell>
                                             <div className={cn("w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs", colors.iconBg, colors.text)}>
@@ -270,73 +295,145 @@ export default function StudentsPage() {
                             )}
                         </TableBody>
                     </Table>
+
+                    {/* Pagination */}
+                    {filteredStudents.length > itemsPerPage && (
+                        <div className="px-6 py-4 bg-gray-50/50 border-t border-gray-100 flex items-center justify-between">
+                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                                Gösterilen: {(currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, filteredStudents.length)} / Toplam: {filteredStudents.length}
+                            </p>
+                            <div className="flex items-center gap-1">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={currentPage === 1}
+                                    onClick={() => setCurrentPage(prev => prev - 1)}
+                                    className="h-8 w-8 p-0 rounded-lg border-gray-200 text-gray-600 disabled:opacity-30 cursor-pointer hover:bg-white"
+                                >
+                                    <ChevronLeft className="w-4 h-4" />
+                                </Button>
+                                {Array.from({ length: totalPages }).map((_, i) => (
+                                    <Button
+                                        key={i}
+                                        variant={currentPage === i + 1 ? "default" : "outline"}
+                                        size="sm"
+                                        onClick={() => setCurrentPage(i + 1)}
+                                        className={cn(
+                                            "h-8 w-8 p-0 rounded-lg font-bold text-xs border-gray-200 cursor-pointer shadow-sm mx-0.5",
+                                            currentPage === i + 1 ? cn(colors.buttonBg, colors.buttonHover, "text-white border-transparent shadow-md shadow-gray-200") : "text-gray-600 bg-white hover:border-gray-300"
+                                        )}
+                                    >
+                                        {i + 1}
+                                    </Button>
+                                ))}
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={currentPage === totalPages}
+                                    onClick={() => setCurrentPage(prev => prev + 1)}
+                                    className="h-8 w-8 p-0 rounded-lg border-gray-200 text-gray-600 disabled:opacity-30 cursor-pointer hover:bg-white"
+                                >
+                                    <ChevronRight className="w-4 h-4" />
+                                </Button>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Mobile Card View Area */}
                 <div className="grid grid-cols-1 gap-4 md:hidden">
-                    {filteredStudents.length === 0 ? (
+                    {paginatedStudents.length === 0 ? (
                         <div className="text-center py-10 text-gray-500 bg-white rounded-xl border border-gray-100">
                             {searchTerm ? 'Sonuç bulunamadı' : 'Henüz öğrenci eklenmemiş.'}
                         </div>
                     ) : (
-                        filteredStudents.map((student) => (
-                            <div key={student.id} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm space-y-4">
-                                {/* Header: Avatar, Name, Grade, Assignment Count */}
-                                <div className="flex items-start justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className={cn("w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0", colors.iconBg, colors.text)}>
-                                            {student.name.charAt(0)}
+                        <div className="space-y-4">
+                            {paginatedStudents.map((student) => (
+                                <div key={student.id} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm space-y-4">
+                                    {/* Header: Avatar, Name, Grade, Assignment Count */}
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className={cn("w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0", colors.iconBg, colors.text)}>
+                                                {student.name.charAt(0)}
+                                            </div>
+                                            <div>
+                                                <h3 className="font-bold text-gray-900 leading-tight">{student.name}</h3>
+                                                <span className="inline-flex mt-1 items-center px-2 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600">
+                                                    {student.gradeLevel || '-'}
+                                                </span>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h3 className="font-bold text-gray-900 leading-tight">{student.name}</h3>
-                                            <span className="inline-flex mt-1 items-center px-2 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600">
-                                                {student.gradeLevel || '-'}
-                                            </span>
+                                        <div className={cn("px-2 py-1 rounded-full text-[10px] font-black uppercase whitespace-nowrap", colors.bg, colors.text)}>
+                                            {student._count?.assignments || 0} Ödev
                                         </div>
                                     </div>
-                                    <div className={cn("px-2 py-1 rounded-full text-[10px] font-black uppercase whitespace-nowrap", colors.bg, colors.text)}>
-                                        {student._count?.assignments || 0} Ödev
-                                    </div>
-                                </div>
 
-                                {/* Contact Info */}
-                                <div className="space-y-2 text-sm bg-gray-50/50 p-3 rounded-lg border border-gray-50">
-                                    <div className="flex items-center gap-2 text-gray-600 truncate">
-                                        <Mail className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                                        <span className="truncate">{student.email || '-'}</span>
+                                    {/* Contact Info */}
+                                    <div className="space-y-2 text-sm bg-gray-50/50 p-3 rounded-lg border border-gray-50">
+                                        <div className="flex items-center gap-2 text-gray-600 truncate">
+                                            <Mail className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                                            <span className="truncate">{student.email || '-'}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-gray-600">
+                                            <Phone className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                                            <span>{student.phone || '-'}</span>
+                                        </div>
                                     </div>
-                                    <div className="flex items-center gap-2 text-gray-600">
-                                        <Phone className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                                        <span>{student.phone || '-'}</span>
-                                    </div>
-                                </div>
 
-                                {/* Actions */}
-                                <div className="grid grid-cols-4 gap-2 pt-2">
+                                    {/* Actions */}
+                                    <div className="grid grid-cols-4 gap-2 pt-2">
+                                        <Button
+                                            className="col-span-2 bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-100 font-bold h-9"
+                                            variant="outline"
+                                            onClick={() => router.push(`/dashboard/academy/students/${student.id}`)}
+                                        >
+                                            <Eye className="w-4 h-4 mr-2" /> Analiz
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            className="col-span-1 border-orange-200 text-orange-700 hover:bg-orange-50 h-9"
+                                            onClick={() => handleEdit(student)}
+                                        >
+                                            <Pencil className="w-4 h-4" />
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            className="col-span-1 border-red-200 text-red-700 hover:bg-red-50 h-9"
+                                            onClick={() => handleDelete(student.id)}
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            ))}
+
+                            {/* Mobile Pagination */}
+                            {filteredStudents.length > itemsPerPage && (
+                                <div className="flex items-center justify-center gap-2 pt-2">
                                     <Button
-                                        className="col-span-2 bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-100 font-bold h-9"
                                         variant="outline"
-                                        onClick={() => router.push(`/dashboard/academy/students/${student.id}`)}
+                                        size="sm"
+                                        disabled={currentPage === 1}
+                                        onClick={() => setCurrentPage(prev => prev - 1)}
+                                        className="h-9 w-9 p-0 rounded-xl"
                                     >
-                                        <Eye className="w-4 h-4 mr-2" /> Analiz
+                                        <ChevronLeft className="w-4 h-4" />
                                     </Button>
+                                    <span className="text-xs font-bold text-gray-500">
+                                        {currentPage} / {totalPages}
+                                    </span>
                                     <Button
                                         variant="outline"
-                                        className="col-span-1 border-orange-200 text-orange-700 hover:bg-orange-50 h-9"
-                                        onClick={() => handleEdit(student)}
+                                        size="sm"
+                                        disabled={currentPage === totalPages}
+                                        onClick={() => setCurrentPage(prev => prev + 1)}
+                                        className="h-9 w-9 p-0 rounded-xl"
                                     >
-                                        <Pencil className="w-4 h-4" />
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        className="col-span-1 border-red-200 text-red-700 hover:bg-red-50 h-9"
-                                        onClick={() => handleDelete(student.id)}
-                                    >
-                                        <Trash2 className="w-4 h-4" />
+                                        <ChevronRight className="w-4 h-4" />
                                     </Button>
                                 </div>
-                            </div>
-                        ))
+                            )}
+                        </div>
                     )}
                 </div>
 

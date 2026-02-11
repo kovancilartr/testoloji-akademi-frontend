@@ -123,8 +123,10 @@ export const PDFDocument = ({ questions, projectName, settings, userRole }: PDFT
               <>
                 <View style={[tw(`w-[1px] relative mx-[5px]`), {
                   height: '100%',
-                  backgroundColor: template === 'osym' ? '#d1d5db' : (template === 'modern' || template === 'compact' ? primaryColor : '#e5e7eb'),
-
+                  backgroundColor: template === 'elegant' ? 'transparent' : (template === 'osym' ? '#d1d5db' : (template === 'modern' || template === 'compact' ? primaryColor : '#e5e7eb')),
+                  borderLeftWidth: template === 'elegant' ? 1.5 : 0,
+                  borderLeftStyle: 'dashed',
+                  borderLeftColor: '#d1d5db',
                 }]}>
                   {settings?.watermarkText && template !== 'osym' && (
                     <View style={{ transform: 'rotate(-90deg)', width: 400, alignItems: 'center', position: 'absolute', left: -200, top: '40%', zIndex: 100 }}>
@@ -141,8 +143,20 @@ export const PDFDocument = ({ questions, projectName, settings, userRole }: PDFT
                     </View>
                   )}
                   {template === 'compact' && (
-                    <View style={{ position: 'absolute', top: '25%', left: -10, width: 22, height: 22, backgroundColor: 'white', borderRadius: 11, border: `1px solid ${primaryColor}`, alignItems: 'center', justifyContent: 'center', zIndex: 101 }}>
-                      <Text style={{ fontSize: 7, fontWeight: 'black', color: primaryColor, marginTop: 7 }}>T</Text>
+                    <View style={{ position: 'absolute', top: '35%', left: -5, width: 20, height: '30%', backgroundColor: 'white', alignItems: 'center', justifyContent: 'center', zIndex: 101 }}>
+                      <Text style={{
+                        transform: 'rotate(-90deg)',
+                        fontSize: 8,
+                        fontWeight: 'black',
+                        color: primaryColor,
+                        opacity: 0.6,
+                        letterSpacing: 1,
+                        textTransform: 'uppercase',
+                        width: 150,
+                        textAlign: 'center'
+                      }}>
+                        {settings?.authorName || settings?.title || projectName}
+                      </Text>
                     </View>
                   )}
                 </View>

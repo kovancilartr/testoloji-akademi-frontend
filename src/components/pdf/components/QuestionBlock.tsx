@@ -15,8 +15,8 @@ export const QuestionBlock = ({ q, index, spacing, settings, primaryColor, templ
 
     const getIndexStyle = () => {
         if (template === 'modern') return tw("text-[13px] font-bold text-orange-500");
-        if (template === 'compact') return tw("text-[11px] font-black text-gray-800");
-        if (template === 'elegant') return { fontSize: 12, fontWeight: 700 as any, color: primaryColor, fontFamily: 'Oswald' };
+        if (template === 'compact') return { fontSize: 8, fontWeight: 900 as any, color: 'white', fontFamily: 'Montserrat' };
+        if (template === 'elegant') return { fontSize: 13, fontWeight: 900 as any, color: primaryColor, fontFamily: 'Montserrat' };
         if (template === 'exam') return {
             fontSize: 13,
             fontWeight: 900 as any,
@@ -52,7 +52,7 @@ export const QuestionBlock = ({ q, index, spacing, settings, primaryColor, templ
                                 {index + 1}
                             </Text>
                         </View>
-                    ) : (
+                    ) : template === 'compact' ? null : (
                         <Text style={getIndexStyle()}>{index + 1}.</Text>
                     )}
 
@@ -70,6 +70,25 @@ export const QuestionBlock = ({ q, index, spacing, settings, primaryColor, templ
                     )}
                 </View>
                 <View style={tw("flex-1")}>
+                    {template === 'compact' && (
+                        <View style={tw("flex-row items-center mb-2 w-full")}>
+                            <View style={{
+                                backgroundColor: primaryColor,
+                                borderRadius: 10,
+                                paddingHorizontal: 8,
+                                paddingVertical: 2,
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                gap: 4
+                            }}>
+                                <View style={{ width: 14, height: 14, borderRadius: 7, backgroundColor: 'white', alignItems: 'center', justifyContent: 'center' }}>
+                                    <Text style={{ fontSize: 7, fontWeight: 'black', color: primaryColor }}>{index + 1}</Text>
+                                </View>
+                                <Text style={{ fontSize: 7, fontWeight: 'black', color: 'white', letterSpacing: 1 }}>ÖRNEK</Text>
+                            </View>
+                            <View style={{ flex: 1, height: 1, borderTopWidth: 1, borderTopStyle: 'dashed', borderTopColor: `${primaryColor}40`, marginLeft: 8 }} />
+                        </View>
+                    )}
                     <Image
                         src={getImageUrl(q.imageUrl)}
                         style={{ width: '100%', height: 'auto', objectFit: 'contain' }}

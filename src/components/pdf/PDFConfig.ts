@@ -30,7 +30,7 @@ export interface PDFTemplateProps {
         template?: string;
         showCoverPage?: boolean;
         coverTitle?: string;
-        coverTemplate?: 'modern_gradient' | 'minimalist_shapes' | 'creative_pattern';
+        coverTemplate?: 'modern_gradient' | 'minimalist_shapes' | 'creative_pattern' | 'premium_vdk';
         authorName?: string;
         footerText?: string;
     };
