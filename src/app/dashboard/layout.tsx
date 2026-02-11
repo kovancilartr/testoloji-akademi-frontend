@@ -31,7 +31,7 @@ export default function DashboardLayout({
         <div className="flex h-screen overflow-hidden bg-gray-50/50">
             {/* Global Sidebar (Desktop) */}
             {!isProjectStudio && (
-                <AppSidebar className="hidden md:flex shrink-0 z-20" />
+                <AppSidebar className="hidden md:flex shrink-0 z-40" />
             )}
 
             {/* Main Content Area */}

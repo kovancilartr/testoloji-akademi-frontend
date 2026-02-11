@@ -51,7 +51,7 @@ export function CourseSettingsDialog({
 }: CourseSettingsDialogProps) {
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-xl rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl">
+            <DialogContent showCloseButton={false} className="max-w-xl rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl">
                 <Tabs defaultValue="general" className="w-full">
                     <div className="px-8 pt-8 pb-4 bg-slate-50/50 border-b border-slate-100">
                         <div className="flex items-center justify-between mb-6">
@@ -59,9 +59,6 @@ export function CourseSettingsDialog({
                                 <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight">Kurs Ayarları</DialogTitle>
                                 <DialogDescription className="font-medium text-slate-500 text-xs uppercase tracking-widest mt-1">Yapılandırma & Kontrol</DialogDescription>
                             </div>
-                            <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 hover:bg-slate-200/50" onClick={() => onOpenChange(false)}>
-                                <X className="w-4 h-4 text-slate-400" />
-                            </Button>
                         </div>
                         <TabsList className="bg-slate-200/40 p-1 rounded-xl h-10 w-full mb-2">
                             <TabsTrigger value="general" className="flex-1 rounded-lg font-bold text-[10px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm">Genel Bilgiler</TabsTrigger>

@@ -3,6 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, Settings, Globe } from "lucide-react";
+import { useThemeColors } from "@/contexts/ThemeContext";
+import { cn } from "@/lib/utils";
 
 interface CourseHeaderProps {
     course: {
@@ -15,9 +17,11 @@ interface CourseHeaderProps {
 }
 
 export function CourseHeader({ course, onBack, onOpenSettings, onOpenPublish }: CourseHeaderProps) {
+    const colors = useThemeColors();
+
     return (
         <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200/60 px-4 md:px-8 py-4 transition-all group">
-            <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
+            <div className=" flex items-center justify-between gap-4 w-full">
                 <div className="flex items-center gap-4 min-w-0">
                     <Button
                         variant="ghost"
@@ -27,7 +31,7 @@ export function CourseHeader({ course, onBack, onOpenSettings, onOpenPublish }: 
                     >
                         <ChevronLeft className="w-5 h-5 text-slate-600" />
                     </Button>
-                    <div className="min-w-0">
+                    <div className="min-w-0 cursor-default">
                         <div className="flex items-center gap-2 mb-0.5 pointer-events-none">
                             <Badge className="text-[9px] h-4 font-black bg-orange-500/10 text-orange-600 border-none px-1.5 uppercase leading-none">Müfredat Paneli</Badge>
                             {course.isPublished ? (
@@ -59,7 +63,11 @@ export function CourseHeader({ course, onBack, onOpenSettings, onOpenPublish }: 
                         <Settings className="w-4 h-4 mr-2 text-slate-500" /> Ayarlar
                     </Button>
                     <Button
-                        className="bg-slate-900 hover:bg-slate-800 text-white font-bold h-10 px-4 md:px-6 shadow-lg shadow-slate-200 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
+                        className={cn(
+                            "cursor-pointer text-white font-bold h-10 px-4 md:px-6 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] bg-linear-to-br border-0",
+                            colors.gradient,
+                            colors.shadow
+                        )}
                         onClick={onOpenPublish}
                     >
                         <Globe className="w-4 h-4 md:mr-2" /> <span className="hidden md:inline">Yayınla & Paylaş</span>

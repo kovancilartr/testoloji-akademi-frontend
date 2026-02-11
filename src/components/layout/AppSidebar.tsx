@@ -287,7 +287,7 @@ export function AppSidebar({ className, userDropdownSide = "right" }: SidebarPro
                     variant="ghost"
                     size="icon"
                     className={cn(
-                        "h-7 w-7  cursor-pointer bg-gradient-to-br shadow-lg border-0 transition-all duration-300 hover:scale-110 active:scale-95",
+                        "h-7 w-10  cursor-pointer bg-linear-to-br shadow-lg border-0 transition-all duration-300 hover:scale-110 active:scale-95",
                         colors.gradient,
                         colors.shadow,
                         "group relative overflow-hidden"
