@@ -11,6 +11,7 @@ import { Menu, GraduationCap } from "lucide-react";
 import { ForcePasswordChangeModal } from "@/components/ui/custom-ui/auth/ForcePasswordChangeModal";
 import { NotificationPopover } from "@/components/ui/custom-ui/dashboard-components/NotificationPopover";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { CoachingWarning } from "@/components/ui/custom-ui/dashboard-components/CoachingWarning";
 
 export default function DashboardLayout({
     children,
@@ -70,6 +71,7 @@ export default function DashboardLayout({
                     {children}
                 </main>
                 <ForcePasswordChangeModal />
+                <CoachingWarning />
             </div>
         </div>
     );
