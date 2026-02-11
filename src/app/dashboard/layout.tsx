@@ -12,6 +12,7 @@ import { ForcePasswordChangeModal } from "@/components/ui/custom-ui/auth/ForcePa
 import { NotificationPopover } from "@/components/ui/custom-ui/dashboard-components/NotificationPopover";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { CoachingWarning } from "@/components/ui/custom-ui/dashboard-components/CoachingWarning";
+import Link from "next/link";
 
 export default function DashboardLayout({
     children,
@@ -41,12 +42,14 @@ export default function DashboardLayout({
                 {/* Mobile Header */}
                 {!isProjectStudio && (
                     <header className="md:hidden h-16 bg-white border-b border-gray-100 flex items-center justify-between px-4 shrink-0 z-30">
-                        <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-xl bg-orange-500 flex items-center justify-center shrink-0">
-                                <GraduationCap className="text-white w-5 h-5" />
+                        <Link href="/" className="flex items-center gap-3 overflow-hidden group">
+                            <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-xl bg-orange-500 flex items-center justify-center shrink-0">
+                                    <GraduationCap className="text-white w-5 h-5" />
+                                </div>
+                                <span className="font-black text-lg tracking-tight text-gray-900">TESTOLOJİ</span>
                             </div>
-                            <span className="font-black text-lg tracking-tight text-gray-900">TESTOLOJİ</span>
-                        </div>
+                        </Link>
 
                         <div className="flex items-center gap-2">
                             <NotificationPopover />

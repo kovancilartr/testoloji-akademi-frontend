@@ -282,10 +282,10 @@ export default function PdfCropperDialog({ projectId, onQuestionAdded, onBeforeO
                 <span className="hidden sm:inline dialog-text-span">PDF'den Soru Seç</span>
             </Button>
             <DialogPortal>
-                <DialogOverlay className="z-[150]" />
-                <DialogContent className="!max-w-[100vw] w-full sm:w-[1600px] h-full sm:h-[95vh] p-0 overflow-hidden border-none shadow-2xl rounded-none sm:rounded-[2.5rem] bg-white flex flex-col z-[150]">
+                <DialogOverlay className="z-150" />
+                <DialogContent className="max-w-[100vw]! w-full sm:w-[1600px] h-full sm:h-[95vh] p-0 overflow-hidden border-none shadow-2xl rounded-none sm:rounded-[2.5rem] bg-white flex flex-col z-150">
 
-                    <div className="relative z-[160]">
+                    <div className="relative z-160">
                         <PdfHeader
                             activePdf={activePdf}
                             pdfs={pdfs}
@@ -310,7 +310,7 @@ export default function PdfCropperDialog({ projectId, onQuestionAdded, onBeforeO
                         {activePdf && !showSettings && (
                             <>
                                 {/* Bottom Tool Bar (Crop/Pan/Auto/Magic) */}
-                                <div className={`sm:hidden absolute bottom-18 left-2 z-[165] flex flex-col gap-2 ${mobileView === 'queue' ? 'hidden' : ''}`}>
+                                <div className={`sm:hidden absolute bottom-18 left-2 z-165 flex flex-col gap-2 ${mobileView === 'queue' ? 'hidden' : ''}`}>
                                     <div className="bg-white/90 backdrop-blur-xl border border-gray-200 p-1.5 rounded-xl shadow-xl flex flex-col gap-2">
                                         <button
                                             onClick={() => setCropMode('crop')}
@@ -345,7 +345,7 @@ export default function PdfCropperDialog({ projectId, onQuestionAdded, onBeforeO
 
                                 {/* Main View Params Switcher */}
                                 {!completedCrop && (
-                                    <div className={`sm:hidden absolute bottom-18 left-1/2 -translate-x-1/2 z-[165] px-4 w-full max-w-[280px] transition-all duration-300`}>
+                                    <div className={`sm:hidden absolute bottom-18 left-1/2 -translate-x-1/2 z-165 px-4 w-full max-w-[280px] transition-all duration-300`}>
                                         <div className="bg-gray-900/95 backdrop-blur-xl border border-white/20 p-1 rounded-2xl shadow-2xl flex items-center gap-1 overflow-hidden transition-all duration-300">
                                             <button
                                                 onClick={() => setMobileView('pdf')}
@@ -406,7 +406,7 @@ export default function PdfCropperDialog({ projectId, onQuestionAdded, onBeforeO
                                 )}
 
                                 {activePdf && (
-                                    <div className={`m-auto relative shadow-[0_0_100px_-20px_rgba(0,0,0,0.2)] border-[4px] sm:border-[8px] border-white rounded-xl sm:rounded-2xl bg-white transition-all duration-500 ${cropMode === 'pan' ? 'cursor-grab active:cursor-grabbing' : 'cursor-crosshair'}`}>
+                                    <div className={`m-auto relative shadow-[0_0_100px_-20px_rgba(0,0,0,0.2)] border-4 sm:border-8 border-white rounded-xl sm:rounded-2xl bg-white transition-all duration-500 ${cropMode === 'pan' ? 'cursor-grab active:cursor-grabbing' : 'cursor-crosshair'}`}>
                                         <ReactCrop
                                             crop={crop}
                                             onChange={c => setCrop(c)}
@@ -467,7 +467,7 @@ export default function PdfCropperDialog({ projectId, onQuestionAdded, onBeforeO
                                         {/* Floating Selection Popup inside Crop Container */}
                                         {completedCrop && (
                                             <div
-                                                className="absolute z-[180] animate-in zoom-in-95 duration-200 sm:hidden"
+                                                className="absolute z-180 animate-in zoom-in-95 duration-200 sm:hidden"
                                                 style={getPopupPosition()}
                                             >
                                                 <div className="bg-white rounded-xl shadow-2xl border border-gray-100 p-2 flex flex-col gap-2 min-w-full">
@@ -504,7 +504,7 @@ export default function PdfCropperDialog({ projectId, onQuestionAdded, onBeforeO
                                                                 addToQueue();
                                                             }}
                                                             size="sm"
-                                                            className="flex-[2] h-9 bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-black text-xs shadow-lg shadow-brand-500/20"
+                                                            className="flex-2 h-9 bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-black text-xs shadow-lg shadow-brand-500/20"
                                                         >
                                                             TAMAM
                                                         </Button>
@@ -572,7 +572,7 @@ export default function PdfCropperDialog({ projectId, onQuestionAdded, onBeforeO
                         </div>
 
                         {showSettings && (
-                            <div className="absolute inset-0 sm:relative sm:inset-auto z-[170] sm:z-auto bg-white/95 sm:bg-white backdrop-blur-md sm:backdrop-blur-none transition-all">
+                            <div className="absolute inset-0 sm:relative sm:inset-auto z-170 sm:z-auto bg-white/95 sm:bg-white backdrop-blur-md sm:backdrop-blur-none transition-all">
                                 <PdfSettingsSidebar
                                     autoFocus={autoFocus}
                                     setAutoFocus={setAutoFocus}
