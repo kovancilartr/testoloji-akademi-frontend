@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     ChevronLeft, GraduationCap, Calendar, BarChart3, ListChecks,
-    ArrowUpRight, TrendingUp, Clock, FileText, AlertCircle, Edit2, Check, X, PlusCircle, MessageCircle
+    ArrowUpRight, TrendingUp, Clock, FileText, AlertCircle, Edit2, Check, X, PlusCircle, MessageCircle, Trash2
 } from "lucide-react";
+import { useDeleteAssignment } from "@/hooks/use-assignments";
+import { DeleteAssignmentDialog } from "@/components/ui/custom-ui/dashboard-components/assignments/DeleteAssignmentDialog";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -36,12 +38,15 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
     const { id } = use(params);
     const { data: student, isLoading } = useStudent(id);
     const updateStudent = useUpdateStudent();
+    const deleteAssignment = useDeleteAssignment();
     const router = useRouter();
     const colors = useThemeColors();
 
     const [isEditingNotes, setIsEditingNotes] = useState(false);
     const [notes, setNotes] = useState("");
     const [isContactOpen, setIsContactOpen] = useState(false);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [assignmentToDelete, setAssignmentToDelete] = useState<{ id: string, title: string } | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
 
@@ -281,19 +286,33 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
                                                             )}
                                                         </TableCell>
                                                         <TableCell className="text-right pr-6">
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                className={cn("font-bold text-xs h-8 px-3 rounded-lg flex items-center gap-1.5 ml-auto cursor-pointer", colors.text, colors.hover)}
-                                                                onClick={() => {
-                                                                    if (assignment.type === 'TEST') {
-                                                                        router.push(`/dashboard/student/exam/${assignment.id}`);
-                                                                    }
-                                                                }}
-                                                            >
-                                                                İncele
-                                                                <ChevronRight className="w-3.5 h-3.5" />
-                                                            </Button>
+                                                            <div className="flex items-center justify-end gap-2">
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    className={cn("font-bold text-xs h-8 px-3 rounded-lg flex items-center gap-1.5 cursor-pointer", colors.text, colors.hover)}
+                                                                    onClick={() => {
+                                                                        if (assignment.type === 'TEST') {
+                                                                            router.push(`/dashboard/student/exam/${assignment.id}`);
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    İncele
+                                                                    <ChevronRight className="w-3.5 h-3.5" />
+                                                                </Button>
+
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    onClick={() => {
+                                                                        setAssignmentToDelete({ id: assignment.id, title: assignment.title });
+                                                                        setIsDeleteDialogOpen(true);
+                                                                    }}
+                                                                    className="h-8 w-8 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+                                                                >
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </Button>
+                                                            </div>
                                                         </TableCell>
                                                     </TableRow>
                                                 ))
@@ -384,6 +403,13 @@ export default function StudentDetailPage({ params }: { params: Promise<{ id: st
                     onOpenChange={setIsContactOpen}
                     studentName={student.name}
                     studentPhone={student.phone}
+                />
+
+                {/* Delete Confirmation Dialog */}
+                <DeleteAssignmentDialog
+                    isOpen={isDeleteDialogOpen}
+                    onOpenChange={setIsDeleteDialogOpen}
+                    assignmentToDelete={assignmentToDelete}
                 />
             </div>
         </RoleProtect>
