@@ -27,6 +27,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Loader2 } from "lucide-react";
 import {
     Sheet,
     SheetContent,
@@ -48,6 +50,7 @@ export default function ExamPage({ params }: { params: Promise<{ assignmentId: s
     const [timeLeft, setTimeLeft] = useState<number | null>(null);
     const [isReviewMode, setIsReviewMode] = useState(false);
     const [isAnswerKeyOpen, setIsAnswerKeyOpen] = useState(false);
+    const [isImageLoading, setIsImageLoading] = useState(true);
     const router = useRouter();
     const queryClient = useQueryClient();
 
@@ -79,6 +82,11 @@ export default function ExamPage({ params }: { params: Promise<{ assignmentId: s
             setAnswers(exam.answers);
         }
     }, [exam, answers]);
+
+    // Reset image loading on question change
+    useEffect(() => {
+        setIsImageLoading(true);
+    }, [currentIndex]);
 
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
@@ -283,18 +291,29 @@ export default function ExamPage({ params }: { params: Promise<{ assignmentId: s
                     >
                         <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
                     </Button>
-                    <div className="hidden sm:block">
+                    <div className="flex flex-col">
                         <div className="flex items-center gap-2">
-                            <Badge className="bg-orange-100 text-orange-600 border-none font-black text-[10px] uppercase px-3 py-1 rounded-full">
-                                {isReviewMode ? "İnceleme" : "CANLI SINAV"}
+                            <Badge className="hidden xs:flex bg-orange-100 text-orange-600 border-none font-black text-[8px] md:text-[10px] uppercase px-2 md:px-3 py-0.5 md:py-1 rounded-full shrink-0">
+                                {isReviewMode ? "İnceleme" : "CANLI"}
                             </Badge>
-                            <h1 className="text-sm md:text-lg font-black text-slate-900 tracking-tight line-clamp-1">
+                            <h1 className="text-xs md:text-lg font-black text-slate-900 tracking-tight line-clamp-1 max-w-[120px] xs:max-w-[180px] sm:max-w-none">
                                 {exam.project?.name || "Yükleniyor..."}
                             </h1>
                         </div>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">
-                            Soru {currentIndex + 1} / {questions.length}
-                        </p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                            <p className="text-[9px] md:text-[10px] text-slate-400 font-bold uppercase tracking-widest shrink-0">
+                                Soru {currentIndex + 1} / {questions.length}
+                            </p>
+                            {/* Mini Progress Bar for Mobile */}
+                            {!isReviewMode && (
+                                <div className="md:hidden w-12 xs:w-20 h-1 bg-slate-100 rounded-full overflow-hidden">
+                                    <div
+                                        className="h-full bg-orange-500 transition-all duration-300"
+                                        style={{ width: `${progress}%` }}
+                                    />
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -333,17 +352,77 @@ export default function ExamPage({ params }: { params: Promise<{ assignmentId: s
             </header>
 
             {/* Redesign: Main Layout */}
-            <main className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
+            <main
+                onContextMenu={(e) => e.preventDefault()}
+                className="flex-1 flex flex-col lg:flex-row overflow-hidden relative"
+            >
                 {/* Left: Question Area */}
                 <div className="flex-1 flex flex-col overflow-hidden">
                     <div className="flex-1 bg-slate-50 p-4 md:p-8 lg:p-12 flex items-center justify-center overflow-auto">
                         {currentQuestion ? (
-                            <div className="bg-white shadow-[0_24px_48px_-12px_rgba(0,0,0,0.08)] p-3 md:p-6 lg:p-8 rounded-[1.5rem] md:rounded-[2.5rem] max-w-5xl w-full border border-slate-100 animate-in zoom-in-95 duration-500">
-                                <img
-                                    src={currentQuestion.imageUrl}
-                                    alt={`Soru ${currentIndex + 1}`}
-                                    className="w-full h-auto rounded-xl md:rounded-2xl max-h-[50vh] lg:max-h-[70vh] object-contain mx-auto"
-                                />
+                            <div className="w-full max-w-5xl">
+                                <div className="bg-white shadow-[0_24px_48px_-12px_rgba(0,0,0,0.08)] p-3 md:p-6 lg:p-8 rounded-[1.5rem] md:rounded-[2.5rem] w-full border border-slate-100 animate-in zoom-in-95 duration-500 relative min-h-[300px] flex items-center justify-center">
+                                    {isImageLoading && (
+                                        <div className="absolute inset-3 md:inset-6 lg:inset-8 z-10 flex flex-col items-center justify-center space-y-4">
+                                            <Skeleton className="w-full h-full absolute inset-0 rounded-xl md:rounded-2xl" />
+                                            <div className="relative z-20 flex flex-col items-center gap-3">
+                                                <div className="w-12 h-12 bg-white/80 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg">
+                                                    <Loader2 className="w-6 h-6 text-orange-500 animate-spin" />
+                                                </div>
+                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest animate-pulse">Soru Yükleniyor...</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                    <img
+                                        src={currentQuestion.imageUrl}
+                                        alt={`Soru ${currentIndex + 1}`}
+                                        onLoad={() => setIsImageLoading(false)}
+                                        draggable={false}
+                                        onContextMenu={(e) => e.preventDefault()}
+                                        className={cn(
+                                            "w-full h-auto rounded-xl md:rounded-2xl max-h-[50vh] lg:max-h-[70vh] object-contain mx-auto transition-all duration-500 select-none",
+                                            isImageLoading ? "opacity-0 scale-95" : "opacity-100 scale-100"
+                                        )}
+                                    />
+                                </div>
+
+                                {/* Fütüristik Hızlı Cevap Seçimi */}
+                                <div className="mt-2 flex justify-center animate-in slide-in-from-bottom-4 duration-700 delay-300 fill-mode-both">
+                                    <div className="bg-white/80 backdrop-blur-md border border-slate-200 px-3 py-2.5 rounded-[2rem] shadow-xl shadow-slate-200/50 flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-orange-500 rounded-2xl flex items-center justify-center text-white font-black text-sm shadow-lg shadow-orange-100">
+                                            {currentIndex + 1}
+                                        </div>
+
+                                        <div className="flex items-center gap-2 pr-1">
+                                            {OPTIONS.map((option) => {
+                                                const selectedAnswer = answers[currentQuestion.id];
+                                                const isSelected = selectedAnswer === option;
+                                                const isThisCorrect = currentQuestion.correctAnswer === option;
+                                                const showResult = isReviewMode;
+
+                                                return (
+                                                    <button
+                                                        key={option}
+                                                        onClick={() => !isReviewMode && setAnswers(prev => ({ ...prev, [currentQuestion.id]: option }))}
+                                                        className={cn(
+                                                            "w-10 h-10 rounded-full font-black text-sm transition-all duration-300 flex items-center justify-center",
+                                                            "hover:scale-110 active:scale-95",
+                                                            showResult && isThisCorrect
+                                                                ? "bg-emerald-500 text-white ring-4 ring-emerald-100 shadow-lg shadow-emerald-100"
+                                                                : showResult && isSelected && !isThisCorrect
+                                                                    ? "bg-red-500 text-white ring-4 ring-red-100 shadow-lg shadow-red-100"
+                                                                    : isSelected
+                                                                        ? "bg-orange-500 text-white ring-4 ring-orange-100 shadow-lg shadow-orange-100 font-bold"
+                                                                        : "bg-slate-50 text-slate-500 hover:bg-slate-100 border border-slate-200"
+                                                        )}
+                                                    >
+                                                        {option}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         ) : (
                             <div className="text-slate-300 font-black text-xl uppercase tracking-[0.2em]">Soru Hazırlanıyor...</div>
@@ -483,8 +562,8 @@ export default function ExamPage({ params }: { params: Promise<{ assignmentId: s
                         )}
                     </div>
                 </div>
-            </main>
-        </div>
+            </main >
+        </div >
     );
 }
 
