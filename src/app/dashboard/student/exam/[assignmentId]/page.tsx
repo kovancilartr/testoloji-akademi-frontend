@@ -18,14 +18,22 @@ import {
     X,
     ClipboardList,
     Home,
-    RotateCcw
+    RotateCcw,
+    LayoutList
 } from "lucide-react";
-import { use, useState, useEffect, useMemo } from "react";
+import { use, useState, useEffect, useMemo, useCallback } from "react";
 import { Progress } from "@/components/ui/progress";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import {
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from "@/components/ui/sheet";
 
 const OPTIONS = ["A", "B", "C", "D", "E"];
 
@@ -39,6 +47,7 @@ export default function ExamPage({ params }: { params: Promise<{ assignmentId: s
     const [answers, setAnswers] = useState<Record<string, string>>({});
     const [timeLeft, setTimeLeft] = useState<number | null>(null);
     const [isReviewMode, setIsReviewMode] = useState(false);
+    const [isAnswerKeyOpen, setIsAnswerKeyOpen] = useState(false);
     const router = useRouter();
     const queryClient = useQueryClient();
 
@@ -144,80 +153,122 @@ export default function ExamPage({ params }: { params: Promise<{ assignmentId: s
     if (isLoading) return <FullPageLoader message="Sınav yükleniyor..." />;
     if (!exam) return <div className="p-10 text-center font-bold text-slate-500">Sınav bulunamadı.</div>;
 
-    // Redesign: Completion Screen
-    if (exam.status === 'COMPLETED' && !isReviewMode) {
+    const renderAnswerSheet = () => {
         return (
-            <div className="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-700">
-                <div className="max-w-md w-full space-y-8">
-                    <div className="relative mx-auto w-32 h-32">
-                        <div className="absolute inset-0 bg-orange-100 rounded-[2.5rem] rotate-6 animate-pulse"></div>
-                        <div className="relative z-10 w-32 h-32 bg-orange-500 rounded-[2.5rem] flex items-center justify-center shadow-2xl shadow-orange-200">
-                            <Trophy className="w-16 h-16 text-white" />
-                        </div>
-                    </div>
+            <div className="space-y-2 mb-6">
+                {questions.map((question, idx) => {
+                    const questionNumber = idx + 1;
+                    const selectedAnswer = answers[question.id];
+                    const isCurrentQuestion = currentIndex === idx;
+                    const isCorrect = question.correctAnswer === selectedAnswer;
+                    const showResult = isReviewMode;
 
-                    <div className="space-y-2">
-                        <h1 className="text-4xl font-black text-slate-900 tracking-tight">Sınav Tamamlandı!</h1>
-                        <p className="text-slate-400 font-bold">Harika iş çıkardın, sonuçların hemen burada.</p>
-                    </div>
-
-                    <div className="bg-slate-50 border border-slate-100 rounded-[2.5rem] p-8 space-y-8 shadow-sm">
-                        <div className="space-y-2">
-                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none">BAŞARI SKORU</div>
-                            <div className="text-7xl font-black text-slate-900 tracking-tighter leading-none">
-                                %{exam.grade?.toFixed(0)}
-                            </div>
-                        </div>
-
-                        {stats && (
-                            <div className="grid grid-cols-3 gap-3">
-                                <div className="bg-white p-4 rounded-3xl border border-slate-100 space-y-1">
-                                    <div className="flex justify-center"><CheckCircle className="w-4 h-4 text-emerald-500" /></div>
-                                    <div className="text-xl font-black text-slate-900">{stats.correct}</div>
-                                    <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">DOĞRU</div>
-                                </div>
-                                <div className="bg-white p-4 rounded-3xl border border-slate-100 space-y-1">
-                                    <div className="flex justify-center"><XCircle className="w-4 h-4 text-red-500" /></div>
-                                    <div className="text-xl font-black text-slate-900">{stats.wrong}</div>
-                                    <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">YANLIŞ</div>
-                                </div>
-                                <div className="bg-white p-4 rounded-3xl border border-slate-100 space-y-1">
-                                    <div className="flex justify-center"><AlertCircle className="w-4 h-4 text-slate-400" /></div>
-                                    <div className="text-xl font-black text-slate-900">{stats.net}</div>
-                                    <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">NET</div>
-                                </div>
-                            </div>
-                        )}
-
-                        <div className="pt-2">
-                            <Badge className={cn(
-                                "border-none py-2 px-8 rounded-full font-black text-[10px] uppercase tracking-widest shadow-lg",
-                                exam.grade && exam.grade >= 70 ? "bg-emerald-500 text-white shadow-emerald-100" : "bg-slate-900 text-white shadow-slate-100"
+                    return (
+                        <div
+                            key={question.id}
+                            onClick={() => {
+                                setCurrentIndex(idx);
+                                if (isAnswerKeyOpen) setIsAnswerKeyOpen(false);
+                            }}
+                            className={cn(
+                                "flex items-center gap-3 p-2.5 rounded-xl transition-all cursor-pointer",
+                                isCurrentQuestion ? "bg-orange-50 ring-2 ring-orange-200" : "bg-slate-50 hover:bg-slate-100"
+                            )}
+                        >
+                            {/* Question Number */}
+                            <div className={cn(
+                                "w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm shrink-0",
+                                isCurrentQuestion ? "bg-orange-500 text-white" : "bg-white text-slate-600"
                             )}>
-                                {exam.grade && exam.grade >= 70 ? 'Mükemmel Başarı' : 'Sınav Tamamlandı'}
-                            </Badge>
+                                {questionNumber}
+                            </div>
+
+                            {/* Answer Bubbles */}
+                            <div className="flex items-center gap-1.5 flex-1">
+                                {OPTIONS.map((option) => {
+                                    const isSelected = selectedAnswer === option;
+                                    const isThisCorrect = question.correctAnswer === option;
+
+                                    return (
+                                        <button
+                                            key={option}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                if (!isReviewMode) {
+                                                    setAnswers(prev => ({ ...prev, [question.id]: option }));
+                                                }
+                                            }}
+                                            disabled={isReviewMode}
+                                            className={cn(
+                                                "relative w-9 h-9 rounded-full transition-all shrink-0",
+                                                "flex items-center justify-center",
+                                                showResult && isThisCorrect
+                                                    ? "bg-emerald-500 ring-2 ring-emerald-300"
+                                                    : showResult && isSelected && !isThisCorrect
+                                                        ? "bg-red-500 ring-2 ring-red-300"
+                                                        : isSelected
+                                                            ? "bg-orange-500 ring-2 ring-orange-300"
+                                                            : "bg-white border-2 border-slate-300 hover:border-slate-400"
+                                            )}
+                                        >
+                                            <span className={cn(
+                                                "font-black text-xs",
+                                                isSelected || (showResult && isThisCorrect) ? "text-white" : "text-slate-500"
+                                            )}>
+                                                {option}
+                                            </span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Result Indicator */}
+                            {showResult && (
+                                <div className="shrink-0">
+                                    {isCorrect ? (
+                                        <CheckCircle className="w-5 h-5 text-emerald-500" />
+                                    ) : selectedAnswer ? (
+                                        <XCircle className="w-5 h-5 text-red-500" />
+                                    ) : (
+                                        <div className="w-5 h-5" />
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
+
+                {isReviewMode && (
+                    <div className={cn(
+                        "mt-8 p-4 md:p-5 rounded-3xl border flex flex-col gap-2.5 animate-in fade-in slide-in-from-top-4 duration-500",
+                        answers[currentQuestion?.id] === currentQuestion?.correctAnswer ? "bg-emerald-50 border-emerald-100" : "bg-red-50 border-red-100"
+                    )}>
+                        <div className="flex items-center gap-3">
+                            {answers[currentQuestion?.id] === currentQuestion?.correctAnswer
+                                ? <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white shrink-0"><Check className="w-5 h-5" /></div>
+                                : <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white shrink-0"><X className="w-5 h-5" /></div>
+                            }
+                            <div className="flex-1 min-w-0">
+                                <h4 className={cn("text-base font-black leading-none", answers[currentQuestion?.id] === currentQuestion?.correctAnswer ? "text-emerald-900" : "text-red-900")}>
+                                    {answers[currentQuestion?.id] === currentQuestion?.correctAnswer ? "Harika!" : "Gözden Geçir"}
+                                </h4>
+                                <p className={cn("text-[11px] font-bold opacity-70 truncate")}>
+                                    {answers[currentQuestion?.id] === currentQuestion?.correctAnswer
+                                        ? "Bu soruyu doğru cevapladın."
+                                        : answers[currentQuestion?.id] ? "Bu soruda bir hata yaptın." : "Bu soruyu boş bıraktın."}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="h-px bg-current opacity-10"></div>
+                        <div className="flex justify-between items-center text-sm">
+                            <span className="font-black opacity-60 uppercase tracking-widest text-[9px]">DOĞRU SEÇENEK</span>
+                            <span className="text-lg font-black">{currentQuestion?.correctAnswer}</span>
                         </div>
                     </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <Button
-                            onClick={() => setIsReviewMode(true)}
-                            variant="outline"
-                            className="h-16 rounded-2xl border-2 border-slate-200 font-black text-slate-600 hover:bg-slate-50 transition-all flex items-center gap-2"
-                        >
-                            <ClipboardList className="w-5 h-5" /> İNCELE
-                        </Button>
-                        <Button
-                            onClick={() => courseId ? router.push(`/dashboard/student/library/${courseId}`) : router.push("/dashboard/student/assignments")}
-                            className="h-16 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-black transition-all flex items-center gap-2"
-                        >
-                            <Home className="w-5 h-5" /> {courseId ? "Kursa Dön" : "Ödevlere Dön"}
-                        </Button>
-                    </div>
-                </div>
+                )}
             </div>
         );
-    }
+    };
 
     return (
         <div className="fixed inset-0 z-[200] bg-[#f8fafc] flex flex-col overflow-hidden font-plus-jakarta">
@@ -284,163 +335,128 @@ export default function ExamPage({ params }: { params: Promise<{ assignmentId: s
             {/* Redesign: Main Layout */}
             <main className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
                 {/* Left: Question Area */}
-                <div className="flex-1 bg-slate-50 p-4 md:p-8 lg:p-12 flex items-center justify-center overflow-auto">
-                    {currentQuestion ? (
-                        <div className="bg-white shadow-[0_24px_48px_-12px_rgba(0,0,0,0.08)] p-3 md:p-6 lg:p-8 rounded-[1.5rem] md:rounded-[2.5rem] max-w-5xl w-full border border-slate-100 animate-in zoom-in-95 duration-500">
-                            <img
-                                src={currentQuestion.imageUrl}
-                                alt={`Soru ${currentIndex + 1}`}
-                                className="w-full h-auto rounded-xl md:rounded-2xl max-h-[50vh] lg:max-h-[70vh] object-contain mx-auto"
-                            />
+                <div className="flex-1 flex flex-col overflow-hidden">
+                    <div className="flex-1 bg-slate-50 p-4 md:p-8 lg:p-12 flex items-center justify-center overflow-auto">
+                        {currentQuestion ? (
+                            <div className="bg-white shadow-[0_24px_48px_-12px_rgba(0,0,0,0.08)] p-3 md:p-6 lg:p-8 rounded-[1.5rem] md:rounded-[2.5rem] max-w-5xl w-full border border-slate-100 animate-in zoom-in-95 duration-500">
+                                <img
+                                    src={currentQuestion.imageUrl}
+                                    alt={`Soru ${currentIndex + 1}`}
+                                    className="w-full h-auto rounded-xl md:rounded-2xl max-h-[50vh] lg:max-h-[70vh] object-contain mx-auto"
+                                />
+                            </div>
+                        ) : (
+                            <div className="text-slate-300 font-black text-xl uppercase tracking-[0.2em]">Soru Hazırlanıyor...</div>
+                        )}
+                    </div>
+
+                    {/* Mobile Bottom Bar: [GERİ] [CEVAP ANAHTARI] [İLERİ] */}
+                    <div className="lg:hidden p-4 bg-white border-t border-slate-100 shrink-0 shadow-2xl space-y-3">
+                        <div className="grid grid-cols-3 gap-2">
+                            <Button
+                                variant="outline"
+                                onClick={handlePrev}
+                                disabled={currentIndex === 0}
+                                className="h-12 rounded-2xl border-2 border-slate-100 font-black text-slate-500 text-[10px]"
+                            >
+                                <ChevronLeft className="w-4 h-4 mr-1" /> GERİ
+                            </Button>
+
+                            <Sheet open={isAnswerKeyOpen} onOpenChange={setIsAnswerKeyOpen}>
+                                <SheetTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        className="h-12 rounded-2xl border-2 border-orange-100 bg-orange-50 text-orange-600 font-black text-[10px] flex items-center gap-1.5 shadow-sm"
+                                    >
+                                        <LayoutList className="w-4 h-4" /> CEVAPLAR
+                                    </Button>
+                                </SheetTrigger>
+                                <SheetContent side="bottom" className="h-[85vh] rounded-t-[2.5rem] p-0 border-none overflow-hidden">
+                                    <div className="flex flex-col h-full bg-white">
+                                        <div className="p-6 border-b border-slate-100">
+                                            <SheetHeader className="p-0">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <ClipboardList className="w-5 h-5 text-orange-500" />
+                                                    <SheetTitle className="text-xl font-black text-slate-900">Cevap Anahtarı</SheetTitle>
+                                                </div>
+                                                <p className="text-sm text-slate-400 font-bold">Cevaplarınızı buradan işaretleyebilirsiniz</p>
+                                            </SheetHeader>
+                                        </div>
+                                        <div className="flex-1 overflow-y-auto p-6">
+                                            {renderAnswerSheet()}
+                                        </div>
+                                        <div className="p-6 border-t border-slate-100">
+                                            {!isReviewMode ? (
+                                                <Button
+                                                    onClick={() => {
+                                                        setIsAnswerKeyOpen(false);
+                                                        handleSubmit();
+                                                    }}
+                                                    disabled={isSubmitting}
+                                                    className="w-full h-14 text-lg font-black bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl shadow-lg shadow-emerald-100"
+                                                >
+                                                    {isSubmitting ? 'GÖNDERİLİYOR...' : 'SINAVI BİTİR'}
+                                                </Button>
+                                            ) : (
+                                                <Button
+                                                    onClick={() => {
+                                                        setIsAnswerKeyOpen(false);
+                                                        courseId ? router.push(`/dashboard/student/library/${courseId}`) : router.push("/dashboard/student/assignments");
+                                                    }}
+                                                    className="w-full h-14 text-sm font-black bg-slate-900 text-white rounded-2xl"
+                                                >
+                                                    İNCELEMEYİ BİTİR
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </div>
+                                </SheetContent>
+                            </Sheet>
+
+                            <Button
+                                onClick={handleNext}
+                                disabled={currentIndex === questions.length - 1}
+                                className="h-12 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-black text-[10px]"
+                            >
+                                İLERİ <ChevronRight className="w-4 h-4 ml-1" />
+                            </Button>
                         </div>
-                    ) : (
-                        <div className="text-slate-300 font-black text-xl uppercase tracking-[0.2em]">Soru Hazırlanıyor...</div>
-                    )}
+                    </div>
                 </div>
 
-                {/* Right: Sidebar */}
-                <div className="w-full lg:w-[420px] bg-white border-t lg:border-t-0 lg:border-l border-slate-100 flex flex-col shrink-0 overflow-hidden shadow-2xl relative z-20">
-                    <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 custom-scrollbar">
-                        <div className="mb-6 lg:mb-8 space-y-1">
+                {/* Right: Sidebar (Desktop Only) */}
+                <div className="hidden lg:flex w-[420px] bg-white border-l border-slate-100 flex-col shrink-0 overflow-hidden shadow-2xl relative z-20">
+                    <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+                        <div className="mb-8 space-y-1">
                             <div className="flex items-center gap-2 mb-1">
-                                <ClipboardList className="w-5 h-5 md:w-6 md:h-6 text-orange-500" />
-                                <h3 className="text-lg md:text-xl font-black text-slate-900 tracking-tight">
+                                <ClipboardList className="w-6 h-6 text-orange-500" />
+                                <h3 className="text-xl font-black text-slate-900 tracking-tight">
                                     Cevap Anahtarı
                                 </h3>
                             </div>
-                            <p className="text-xs md:text-sm text-slate-400 font-bold leading-relaxed">
+                            <p className="text-sm text-slate-400 font-bold leading-relaxed">
                                 Cevaplarınızı işaretleyin
                             </p>
                         </div>
 
-                        {/* Optical Form Style Answer Sheet */}
-                        <div className="space-y-2 mb-6">
-                            {questions.map((question, idx) => {
-                                const questionNumber = idx + 1;
-                                const selectedAnswer = answers[question.id];
-                                const isCurrentQuestion = currentIndex === idx;
-                                const isCorrect = question.correctAnswer === selectedAnswer;
-                                const showResult = isReviewMode;
-
-                                return (
-                                    <div
-                                        key={question.id}
-                                        onClick={() => setCurrentIndex(idx)}
-                                        className={cn(
-                                            "flex items-center gap-3 p-2.5 rounded-xl transition-all cursor-pointer",
-                                            isCurrentQuestion ? "bg-orange-50 ring-2 ring-orange-200" : "bg-slate-50 hover:bg-slate-100"
-                                        )}
-                                    >
-                                        {/* Question Number */}
-                                        <div className={cn(
-                                            "w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm shrink-0",
-                                            isCurrentQuestion ? "bg-orange-500 text-white" : "bg-white text-slate-600"
-                                        )}>
-                                            {questionNumber}
-                                        </div>
-
-                                        {/* Answer Bubbles */}
-                                        <div className="flex items-center gap-1.5 flex-1">
-                                            {OPTIONS.map((option) => {
-                                                const isSelected = selectedAnswer === option;
-                                                const isThisCorrect = question.correctAnswer === option;
-
-                                                return (
-                                                    <button
-                                                        key={option}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            if (!isReviewMode) {
-                                                                setAnswers(prev => ({ ...prev, [question.id]: option }));
-                                                            }
-                                                        }}
-                                                        disabled={isReviewMode}
-                                                        className={cn(
-                                                            "relative w-9 h-9 rounded-full transition-all shrink-0",
-                                                            "flex items-center justify-center",
-                                                            showResult && isThisCorrect
-                                                                ? "bg-emerald-500 ring-2 ring-emerald-300"
-                                                                : showResult && isSelected && !isThisCorrect
-                                                                    ? "bg-red-500 ring-2 ring-red-300"
-                                                                    : isSelected
-                                                                        ? "bg-orange-500 ring-2 ring-orange-300"
-                                                                        : "bg-white border-2 border-slate-300 hover:border-slate-400"
-                                                        )}
-                                                    >
-                                                        <span className={cn(
-                                                            "font-black text-xs",
-                                                            isSelected || (showResult && isThisCorrect) ? "text-white" : "text-slate-500"
-                                                        )}>
-                                                            {option}
-                                                        </span>
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-
-                                        {/* Result Indicator */}
-                                        {showResult && (
-                                            <div className="shrink-0">
-                                                {isCorrect ? (
-                                                    <CheckCircle className="w-5 h-5 text-emerald-500" />
-                                                ) : selectedAnswer ? (
-                                                    <XCircle className="w-5 h-5 text-red-500" />
-                                                ) : (
-                                                    <div className="w-5 h-5" />
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-                                );
-                            })}
-                        </div>
-
-                        {isReviewMode && (
-                            <div className={cn(
-                                "mb-8 p-4 md:p-5 rounded-3xl border flex flex-col gap-2.5 animate-in fade-in slide-in-from-top-4 duration-500",
-                                answers[currentQuestion?.id] === currentQuestion?.correctAnswer ? "bg-emerald-50 border-emerald-100" : "bg-red-50 border-red-100"
-                            )}>
-                                <div className="flex items-center gap-3">
-                                    {answers[currentQuestion?.id] === currentQuestion?.correctAnswer
-                                        ? <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white shrink-0"><Check className="w-5 h-5" /></div>
-                                        : <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white shrink-0"><X className="w-5 h-5" /></div>
-                                    }
-                                    <div className="flex-1 min-w-0">
-                                        <h4 className={cn("text-base font-black leading-none", answers[currentQuestion?.id] === currentQuestion?.correctAnswer ? "text-emerald-900" : "text-red-900")}>
-                                            {answers[currentQuestion?.id] === currentQuestion?.correctAnswer ? "Harika!" : "Gözden Geçir"}
-                                        </h4>
-                                        <p className={cn("text-[11px] font-bold opacity-70 truncate")}>
-                                            {answers[currentQuestion?.id] === currentQuestion?.correctAnswer
-                                                ? "Bu soruyu doğru cevapladın."
-                                                : answers[currentQuestion?.id] ? "Bu soruda bir hata yaptın." : "Bu soruyu boş bıraktın."}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="h-px bg-current opacity-10"></div>
-                                <div className="flex justify-between items-center text-sm">
-                                    <span className="font-black opacity-60 uppercase tracking-widest text-[9px]">DOĞRU SEÇENEK</span>
-                                    <span className="text-lg font-black">{currentQuestion?.correctAnswer}</span>
-                                </div>
-                            </div>
-                        )}
-
+                        {renderAnswerSheet()}
                     </div>
 
-                    {/* Bottom Actions */}
-                    <div className="p-4 md:p-6 border-t border-slate-100 bg-white">
+                    {/* Desktop Bottom Actions */}
+                    <div className="p-6 border-t border-slate-100 bg-white">
                         <div className="grid grid-cols-2 gap-3 mb-4">
                             <Button
                                 variant="outline"
                                 onClick={handlePrev}
                                 disabled={currentIndex === 0}
-                                className="h-12 md:h-14 rounded-2xl border-2 border-slate-100 font-black text-slate-500 text-xs md:text-sm"
+                                className="h-14 rounded-2xl border-2 border-slate-100 font-black text-slate-500 text-sm"
                             >
                                 <ChevronLeft className="w-4 h-4 mr-1" /> GERİ
                             </Button>
                             <Button
                                 onClick={handleNext}
                                 disabled={currentIndex === questions.length - 1}
-                                className="h-12 md:h-14 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs md:text-sm"
+                                className="h-14 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-black text-sm"
                             >
                                 İLERİ <ChevronRight className="w-4 h-4 ml-1" />
                             </Button>
@@ -450,14 +466,14 @@ export default function ExamPage({ params }: { params: Promise<{ assignmentId: s
                             <Button
                                 onClick={handleSubmit}
                                 disabled={isSubmitting}
-                                className="w-full h-14 md:h-16 text-lg md:text-xl font-black shadow-xl shadow-emerald-50 transition-all bg-emerald-600 hover:bg-emerald-700 text-white rounded-[1.25rem]"
+                                className="w-full h-16 text-xl font-black shadow-xl shadow-emerald-50 transition-all bg-emerald-600 hover:bg-emerald-700 text-white rounded-[1.25rem]"
                             >
                                 {isSubmitting ? 'GÖNDERİLİYOR...' : 'SINAVI BİTİR'}
                             </Button>
                         ) : (
                             <Button
                                 onClick={() => courseId ? router.push(`/dashboard/student/library/${courseId}`) : router.push("/dashboard/student/assignments")}
-                                className="w-full h-14 md:h-16 text-sm md:text-lg font-black bg-slate-900 hover:bg-slate-800 text-white rounded-[1.25rem] flex items-center justify-center gap-2"
+                                className="w-full h-16 text-lg font-black bg-slate-900 hover:bg-slate-800 text-white rounded-[1.25rem] flex items-center justify-center gap-2"
                             >
                                 <Home className="w-5 h-5" /> {courseId ? "KURSA DÖN" : "ÖDEVLERE DÖN"}
                             </Button>
