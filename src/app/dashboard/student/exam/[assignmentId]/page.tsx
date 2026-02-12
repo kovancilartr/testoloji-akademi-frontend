@@ -279,7 +279,7 @@ export default function ExamPage({ params }: { params: Promise<{ assignmentId: s
     };
 
     return (
-        <div className="fixed inset-0 z-[200] bg-[#f8fafc] flex flex-col overflow-hidden font-plus-jakarta">
+        <div className="fixed inset-0 z-200 bg-[#f8fafc] flex flex-col overflow-hidden font-plus-jakarta">
             {/* Redesign: Header */}
             <header className="h-16 md:h-20 bg-white border-b border-slate-100 flex items-center justify-between px-4 md:px-8 shrink-0 relative z-30 shadow-sm">
                 <div className="flex items-center gap-3 md:gap-6">
@@ -387,7 +387,7 @@ export default function ExamPage({ params }: { params: Promise<{ assignmentId: s
                                 </div>
 
                                 {/* Fütüristik Hızlı Cevap Seçimi */}
-                                <div className="mt-2 flex justify-center animate-in slide-in-from-bottom-4 duration-700 delay-300 fill-mode-both">
+                                <div className="flex lg:hidden mt-2 justify-center animate-in slide-in-from-bottom-4 duration-700 delay-300 fill-mode-both">
                                     <div className="bg-white/80 backdrop-blur-md border border-slate-200 px-3 py-2.5 rounded-[2rem] shadow-xl shadow-slate-200/50 flex items-center gap-3">
                                         <div className="w-10 h-10 bg-orange-500 rounded-2xl flex items-center justify-center text-white font-black text-sm shadow-lg shadow-orange-100">
                                             {currentIndex + 1}
