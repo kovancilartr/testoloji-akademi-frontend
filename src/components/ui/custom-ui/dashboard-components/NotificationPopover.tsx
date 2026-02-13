@@ -50,7 +50,7 @@ export function NotificationPopover({ side = "bottom", align = "end" }: Notifica
                 align={align}
                 side={side}
                 sideOffset={side === "right" ? 12 : 8}
-                className="w-80 p-2 rounded-2xl shadow-2xl border-slate-100 bg-white/95 backdrop-blur-xl animate-in fade-in-0 zoom-in-95 duration-200"
+                className="w-80 p-2 rounded-2xl shadow-2xl border-slate-100 bg-white/95 backdrop-blur-xl animate-in fade-in-0 zoom-in-95 duration-200 z-400"
             >
                 <div className="px-3 py-2 flex items-center justify-between">
                     <p className="text-[9px] font-black text-brand-500 uppercase tracking-widest">Bildirim Merkezi</p>

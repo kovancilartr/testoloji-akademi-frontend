@@ -43,6 +43,8 @@ export function useCourses() {
             const response = await api.get("/courses");
             return response.data.data as Course[];
         },
+        staleTime: 5 * 60 * 1000,
+        refetchOnWindowFocus: false,
     });
 }
 
@@ -53,6 +55,8 @@ export function useAdminAllCourses() {
             const response = await api.get("/courses/admin/all");
             return response.data.data as (Course & { instructor: { name: string, email: string } })[];
         },
+        staleTime: 5 * 60 * 1000,
+        refetchOnWindowFocus: false,
     });
 }
 
@@ -76,6 +80,8 @@ export function useCreateCourse() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["courses"] });
+            queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
+            queryClient.invalidateQueries({ queryKey: ["user-stats"] });
         },
     });
 }
@@ -115,7 +121,28 @@ export function useUpdateCourse() {
         },
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: ["courses", variables.id] });
+            queryClient.invalidateQueries({ queryKey: ["courses"] });
+            queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
         },
+    });
+}
+
+export function useDeleteCourse() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (id: string) => {
+            const response = await api.delete(`/courses/${id}`);
+            return response.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["courses"] });
+            queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
+            queryClient.invalidateQueries({ queryKey: ["user-stats"] });
+            toast.success("Kurs başarıyla silindi");
+        },
+        onError: () => {
+            toast.error("Kurs silinirken bir hata oluştu");
+        }
     });
 }
 
@@ -229,6 +256,8 @@ export function useMyCourses() {
             const response = await api.get("/courses/my-courses");
             return response.data.data;
         },
+        staleTime: 5 * 60 * 1000,
+        refetchOnWindowFocus: false,
     });
 }
 

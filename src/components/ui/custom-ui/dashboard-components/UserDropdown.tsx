@@ -63,7 +63,7 @@ export function UserDropdown({ trigger, side = "bottom", align = "end" }: UserDr
                         </Button>
                     )}
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align={align} side={side} sideOffset={side === "right" ? 12 : 8} className="w-64 rounded-2xl border-brand-50 shadow-2xl p-2 bg-white/95 backdrop-blur-xl z-[100] animate-in fade-in-0 zoom-in-95 duration-200">
+                <DropdownMenuContent align={align} side={side} sideOffset={side === "right" ? 12 : 8} className="w-64 rounded-2xl border-brand-50 shadow-2xl p-2 bg-white/95 backdrop-blur-xl z-400 animate-in fade-in-0 zoom-in-95 duration-200">
                     <DropdownMenuLabel className="px-3 py-2">
                         <p className="text-[9px] font-black text-brand-500 uppercase tracking-widest">Misafir Hesabı</p>
                     </DropdownMenuLabel>
@@ -170,7 +170,7 @@ export function UserDropdown({ trigger, side = "bottom", align = "end" }: UserDr
                         </Button>
                     )}
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align={align} side={side} sideOffset={side === "right" ? 12 : 8} className="w-64 rounded-2xl border-brand-50 shadow-2xl p-2 bg-white/95 backdrop-blur-xl z-[100] animate-in fade-in-0 zoom-in-95 duration-200">
+                <DropdownMenuContent align={align} side={side} sideOffset={side === "right" ? 12 : 8} className="w-64 rounded-2xl border-brand-50 shadow-2xl p-2 bg-white/95 backdrop-blur-xl z-400 animate-in fade-in-0 zoom-in-95 duration-200">
                     <DropdownMenuLabel className="px-3 py-2">
                         <p className="text-[9px] font-black text-brand-500 uppercase tracking-widest">Kullanıcı Hesabı</p>
                     </DropdownMenuLabel>

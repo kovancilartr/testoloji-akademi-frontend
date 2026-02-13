@@ -1,6 +1,6 @@
 "use client";
 
-import { useStudentAnalytics } from "@/hooks/use-analytics";
+import { useStudentAnalytics, useAiAnalysis } from "@/hooks/use-analytics";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -17,7 +17,12 @@ import {
     BarChart3,
     ChevronLeft,
     ChevronRight,
-    ArrowRight
+    ArrowRight,
+    Bot,
+    Loader2,
+    GraduationCap,
+    Copy,
+    Check,
 } from "lucide-react";
 import {
     Table,
@@ -48,6 +53,7 @@ import {
 } from "@/components/ui/dialog";
 import { useState } from "react";
 import Image from "next/image";
+import { AiAnalysisModal } from "./AiAnalysisModal";
 
 interface StudentAnalyticsViewProps {
     studentId?: string;
@@ -59,6 +65,21 @@ export function StudentAnalyticsView({ studentId }: StudentAnalyticsViewProps) {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
 
+    // AI Koç Analiz State (React Query ile cache'leniyor)
+    const [aiAnalysisModal, setAiAnalysisModal] = useState(false);
+    const [selectedAssignmentId, setSelectedAssignmentId] = useState<string | null>(null);
+    const [aiAnalysisTitle, setAiAnalysisTitle] = useState("");
+
+    const { data: aiAnalysisContent, isLoading: aiAnalysisLoading } = useAiAnalysis(
+        aiAnalysisModal ? selectedAssignmentId : null
+    );
+
+    const openAiAnalysis = (assignmentId: string, title: string) => {
+        setSelectedAssignmentId(assignmentId);
+        setAiAnalysisTitle(title);
+        setAiAnalysisModal(true);
+    };
+
     if (isLoading) return <div className="h-40 flex items-center justify-center font-bold text-slate-400 animate-pulse">Analiz verileri yükleniyor...</div>;
     if (!analytics) return <div className="p-8 text-center text-slate-400">Analiz verisi bulunamadı.</div>;
 
@@ -66,7 +87,7 @@ export function StudentAnalyticsView({ studentId }: StudentAnalyticsViewProps) {
         <div className="space-y-8 animate-in fade-in duration-700">
             {/* Top Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="border-none shadow-xl bg-gradient-to-br from-indigo-600 to-indigo-700 text-white overflow-hidden relative group">
+                <Card className="border-none shadow-xl bg-linear-to-br from-indigo-600 to-indigo-700 text-white overflow-hidden relative group">
                     <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
                         <TrendingUp className="w-16 h-16" />
                     </div>
@@ -127,15 +148,15 @@ export function StudentAnalyticsView({ studentId }: StudentAnalyticsViewProps) {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Main Progress Chart */}
                 <Card className="lg:col-span-2 border-none shadow-2xl bg-white rounded-3xl overflow-hidden">
-                    <CardHeader className="p-8 border-b border-slate-50 flex flex-row items-center justify-between space-y-0 text-slate-900">
+                    <CardHeader className="p-4 md:p-8 border-b border-slate-50 flex flex-row items-center justify-between space-y-0 text-slate-900">
                         <div>
                             <CardTitle className="text-xl font-black tracking-tight">Sınav Analiz Grafiği</CardTitle>
                             <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Son sınavlar ve başarı grafiği</p>
                         </div>
                         <BarChart3 className="w-6 h-6 text-orange-500" />
                     </CardHeader>
-                    <CardContent className="p-8">
-                        <div className="h-[350px] w-full">
+                    <CardContent className="p-4 md:p-8">
+                        <div className="h-[220px] md:h-[350px] w-full">
                             <ResponsiveContainer width="100%" height="100%">
                                 <LineChart data={analytics.scoreHistory}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -265,89 +286,188 @@ export function StudentAnalyticsView({ studentId }: StudentAnalyticsViewProps) {
                     <Target className="w-6 h-6 text-emerald-500" />
                     Sınav Sonuç Detayları
                 </h3>
-                <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl overflow-hidden">
-                    <Table>
-                        <TableHeader className="bg-slate-50/50">
-                            <TableRow className="hover:bg-transparent border-slate-100">
-                                <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 pl-8 h-14">Sınav / Deneme Adı</TableHead>
-                                <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">Tarih</TableHead>
-                                <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 text-center">D / Y / N</TableHead>
-                                <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 text-center">Başarı</TableHead>
-                                <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 text-right pr-8">İşlem</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {analytics.scoreHistory.length === 0 ? (
-                                <TableRow>
-                                    <TableCell colSpan={5} className="h-32 text-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">
-                                        Henüz bir sınav sonucu bulunmuyor.
-                                    </TableCell>
+                <div className="bg-white rounded-3xl md:rounded-[2.5rem] border border-slate-100 shadow-xl overflow-hidden">
+                    {/* Desktop Table - hidden on mobile */}
+                    <div className="hidden md:block">
+                        <Table>
+                            <TableHeader className="bg-slate-50/50">
+                                <TableRow className="hover:bg-transparent border-slate-100">
+                                    <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 pl-8 h-14">Sınav / Deneme Adı</TableHead>
+                                    <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">Tarih</TableHead>
+                                    <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 text-center">D / Y / N</TableHead>
+                                    <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 text-center">Başarı</TableHead>
+                                    <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 text-right pr-8">İşlem</TableHead>
                                 </TableRow>
-                            ) : (
-                                analytics.scoreHistory.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((exam) => (
-                                    <TableRow
-                                        key={exam.id}
-                                        className="hover:bg-slate-50/50 transition-all group cursor-pointer border-slate-50"
-                                        onClick={() => setSelectedExam(exam)}
-                                    >
-                                        <TableCell className="pl-8 py-4">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 group-hover:scale-110 group-hover:bg-white group-hover:text-emerald-500 transition-all border border-slate-100">
-                                                    <Calendar className="w-5 h-5" />
-                                                </div>
-                                                <span className="font-black text-slate-900 tracking-tight">{exam.title}</span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">
-                                                {new Date(exam.date).toLocaleDateString("tr-TR", { day: 'numeric', month: 'long', year: 'numeric' })}
-                                            </span>
-                                        </TableCell>
-                                        <TableCell className="text-center">
-                                            <div className="flex items-center justify-center gap-3">
-                                                <div className="flex flex-col">
-                                                    <span className="text-[9px] font-black text-slate-300 uppercase">D</span>
-                                                    <span className="text-sm font-black text-emerald-600">{exam.correctCount}</span>
-                                                </div>
-                                                <div className="w-px h-6 bg-slate-100" />
-                                                <div className="flex flex-col">
-                                                    <span className="text-[9px] font-black text-slate-300 uppercase">Y</span>
-                                                    <span className="text-sm font-black text-rose-500">{exam.wrongCount}</span>
-                                                </div>
-                                                <div className="w-px h-6 bg-slate-100" />
-                                                <div className="flex flex-col">
-                                                    <span className="text-[9px] font-black text-slate-300 uppercase">N</span>
-                                                    <span className="text-sm font-black text-indigo-600 font-mono">{exam.netCount}</span>
-                                                </div>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="text-center">
-                                            <div className="inline-flex flex-col bg-slate-900 text-white px-3 py-1.5 rounded-xl shadow-lg shadow-slate-200">
-                                                <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest leading-none mb-0.5">PUAN</span>
-                                                <span className="text-xs font-black italic">%{exam.grade}</span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="text-right pr-8">
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="font-black text-[10px] uppercase tracking-widest text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-full px-4 h-8 transition-all"
-                                            >
-                                                Analiz
-                                                <ArrowRight className="w-3 h-3 ml-2 group-hover:translate-x-1 transition-transform" />
-                                            </Button>
+                            </TableHeader>
+                            <TableBody>
+                                {analytics.scoreHistory.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={5} className="h-32 text-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">
+                                            Henüz bir sınav sonucu bulunmuyor.
                                         </TableCell>
                                     </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
+                                ) : (
+                                    analytics.scoreHistory.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((exam) => (
+                                        <TableRow
+                                            key={exam.id}
+                                            className="hover:bg-slate-50/50 transition-all group cursor-pointer border-slate-50"
+                                            onClick={() => setSelectedExam(exam)}
+                                        >
+                                            <TableCell className="pl-8 py-4">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 group-hover:scale-110 group-hover:bg-white group-hover:text-emerald-500 transition-all border border-slate-100">
+                                                        <Calendar className="w-5 h-5" />
+                                                    </div>
+                                                    <span className="font-black text-slate-900 tracking-tight">{exam.title}</span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">
+                                                    {new Date(exam.date).toLocaleDateString("tr-TR", { day: 'numeric', month: 'long', year: 'numeric' })}
+                                                </span>
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                <div className="flex items-center justify-center gap-3">
+                                                    <div className="flex flex-col">
+                                                        <span className="text-[9px] font-black text-slate-300 uppercase">D</span>
+                                                        <span className="text-sm font-black text-emerald-600">{exam.correctCount}</span>
+                                                    </div>
+                                                    <div className="w-px h-6 bg-slate-100" />
+                                                    <div className="flex flex-col">
+                                                        <span className="text-[9px] font-black text-slate-300 uppercase">Y</span>
+                                                        <span className="text-sm font-black text-rose-500">{exam.wrongCount}</span>
+                                                    </div>
+                                                    <div className="w-px h-6 bg-slate-100" />
+                                                    <div className="flex flex-col">
+                                                        <span className="text-[9px] font-black text-slate-300 uppercase">N</span>
+                                                        <span className="text-sm font-black text-indigo-600 font-mono">{exam.netCount}</span>
+                                                    </div>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                <div className="inline-flex flex-col bg-slate-900 text-white px-3 py-1.5 rounded-xl shadow-lg shadow-slate-200">
+                                                    <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest leading-none mb-0.5">PUAN</span>
+                                                    <span className="text-xs font-black italic">%{exam.grade}</span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="text-right pr-8">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    {exam.hasAiAnalysis && (
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                openAiAnalysis(exam.id, exam.title);
+                                                            }}
+                                                            className="font-black text-[10px] uppercase tracking-widest text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-full px-3 h-8 transition-all group/ai-btn"
+                                                        >
+                                                            <Bot className="w-3.5 h-3.5 mr-1.5 group-hover/ai-btn:animate-pulse" />
+                                                            AI Koç Analizini İncele
+                                                        </Button>
+                                                    )}
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="font-black text-[10px] uppercase tracking-widest text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-full px-4 h-8 transition-all"
+                                                    >
+                                                        Analiz
+                                                        <ArrowRight className="w-3 h-3 ml-2 group-hover:translate-x-1 transition-transform" />
+                                                    </Button>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                )}
+                            </TableBody>
+                        </Table>
+                    </div>
+
+                    {/* Mobile Cards - visible only on mobile */}
+                    <div className="md:hidden divide-y divide-slate-100">
+                        {analytics.scoreHistory.length === 0 ? (
+                            <div className="h-32 flex items-center justify-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">
+                                Henüz bir sınav sonucu bulunmuyor.
+                            </div>
+                        ) : (
+                            analytics.scoreHistory.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((exam) => (
+                                <div
+                                    key={exam.id}
+                                    className="p-4 active:bg-slate-50 transition-colors cursor-pointer"
+                                    onClick={() => setSelectedExam(exam)}
+                                >
+                                    {/* Top row: Title + Grade */}
+                                    <div className="flex items-start justify-between gap-3 mb-3">
+                                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                                            <div className="w-9 h-9 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 border border-slate-100 shrink-0">
+                                                <Calendar className="w-4 h-4" />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className="font-black text-slate-900 text-sm tracking-tight truncate">{exam.title}</p>
+                                                <p className="text-[10px] font-bold text-slate-400 mt-0.5">
+                                                    {new Date(exam.date).toLocaleDateString("tr-TR", { day: 'numeric', month: 'long', year: 'numeric' })}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="inline-flex flex-col bg-slate-900 text-white px-2.5 py-1 rounded-xl shadow-lg shrink-0">
+                                            <span className="text-[6px] font-black text-slate-400 uppercase tracking-widest leading-none mb-0.5">PUAN</span>
+                                            <span className="text-xs font-black italic">%{exam.grade}</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Stats row: D / Y / N */}
+                                    <div className="flex items-center gap-4 mb-3 px-1">
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="text-[9px] font-black text-slate-400">D:</span>
+                                            <span className="text-sm font-black text-emerald-600">{exam.correctCount}</span>
+                                        </div>
+                                        <div className="w-px h-4 bg-slate-200" />
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="text-[9px] font-black text-slate-400">Y:</span>
+                                            <span className="text-sm font-black text-rose-500">{exam.wrongCount}</span>
+                                        </div>
+                                        <div className="w-px h-4 bg-slate-200" />
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="text-[9px] font-black text-slate-400">N:</span>
+                                            <span className="text-sm font-black text-indigo-600 font-mono">{exam.netCount}</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Action buttons */}
+                                    <div className="flex items-center gap-2">
+                                        {exam.hasAiAnalysis && (
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    openAiAnalysis(exam.id, exam.title);
+                                                }}
+                                                className="font-black text-[9px] uppercase tracking-widest text-indigo-600 border-indigo-100 hover:bg-indigo-50 rounded-xl px-3 h-8 flex-1"
+                                            >
+                                                <Bot className="w-3.5 h-3.5 mr-1.5" />
+                                                AI Analiz
+                                            </Button>
+                                        )}
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="font-black text-[9px] uppercase tracking-widest text-emerald-600 border-emerald-100 hover:bg-emerald-50 rounded-xl px-3 h-8 flex-1"
+                                        >
+                                            Detay
+                                            <ArrowRight className="w-3 h-3 ml-1.5" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
 
                     {/* Pagination */}
                     {analytics.scoreHistory.length > itemsPerPage && (
-                        <div className="p-6 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
+                        <div className="p-4 md:p-6 bg-slate-50/50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                                GÖSTERİLEN: {(currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, analytics.scoreHistory.length)} / TOPLAM: {analytics.scoreHistory.length}
+                                {(currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, analytics.scoreHistory.length)} / {analytics.scoreHistory.length}
                             </p>
                             <div className="flex items-center gap-1.5">
                                 <Button
@@ -390,8 +510,8 @@ export function StudentAnalyticsView({ studentId }: StudentAnalyticsViewProps) {
 
             {/* Exam Analysis Modal */}
             <Dialog open={!!selectedExam} onOpenChange={() => setSelectedExam(null)}>
-                <DialogContent className="sm:max-w-[80vw] lg:max-w-[1200px] h-[92vh] flex flex-col p-0 overflow-hidden rounded-[2.5rem] border-none shadow-2xl bg-white">
-                    <DialogHeader className="p-8 pb-6 border-b border-slate-100 shrink-0 bg-white z-10">
+                <DialogContent className="max-w-full sm:max-w-[80vw] lg:max-w-[1200px] h-screen sm:h-[92vh] flex flex-col p-0 overflow-hidden rounded-none sm:rounded-[2.5rem] border-none shadow-2xl bg-white">
+                    <DialogHeader className="p-4 md:p-8 pb-4 md:pb-6 border-b border-slate-100 shrink-0 bg-white z-10">
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                             <div className="space-y-1">
                                 <div className="flex items-center gap-3">
@@ -451,7 +571,7 @@ export function StudentAnalyticsView({ studentId }: StudentAnalyticsViewProps) {
                                                     </span>
                                                 )}
                                             </div>
-                                            <div className="relative aspect-[16/9] max-h-[250px] w-full rounded-xl overflow-hidden border border-slate-100 bg-white">
+                                            <div className="relative aspect-video max-h-[250px] w-full rounded-xl overflow-hidden border border-slate-100 bg-white">
                                                 <Image
                                                     src={q.imageUrl}
                                                     alt={`Soru ${idx + 1}`}
@@ -521,6 +641,13 @@ export function StudentAnalyticsView({ studentId }: StudentAnalyticsViewProps) {
                     </div>
                 </DialogContent>
             </Dialog>
+            <AiAnalysisModal
+                open={aiAnalysisModal}
+                onOpenChange={setAiAnalysisModal}
+                title={aiAnalysisTitle}
+                content={aiAnalysisContent ?? null}
+                loading={aiAnalysisLoading}
+            />
         </div>
     );
 }

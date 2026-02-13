@@ -2,7 +2,7 @@
 
 import { UserRow } from "./UserRow";
 import { Role, SubscriptionTier } from "@/types/auth";
-import { Users, Search } from "lucide-react";
+import { Search } from "lucide-react";
 
 interface UserTableProps {
     users: any[];
@@ -21,7 +21,7 @@ export const UserTable = ({
     onTierChange,
     onToggleStatus,
     onDeleteClick,
-    onToggleCoachingAccess
+    onToggleCoachingAccess,
 }: UserTableProps) => {
     return (
         <div className="space-y-4">
@@ -31,8 +31,8 @@ export const UserTable = ({
                 <div className="col-span-2">Rol / Paket</div>
                 <div className="col-span-2">Öğretmen / Öğrenci</div>
                 <div className="col-span-2">Abonelik</div>
-                <div className="col-span-2">Aktivite</div>
-                <div className="col-span-1 text-right pr-2">İşlem</div>
+                <div className="col-span-1">Aktivite</div>
+                <div className="col-span-2 text-right pr-2">İşlem</div>
             </div>
 
             {/* Table Content */}

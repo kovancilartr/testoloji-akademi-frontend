@@ -16,15 +16,15 @@ export function useProjects() {
     return useQuery({
         queryKey: ["projects"],
         queryFn: async () => {
-            // Check if user is logged in (via localStorage token check or similar)
-            // But here we can just try to fetch and if it fails or if we want to be explicit:
             const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
             if (!token) {
                 return getGuestProjects() as Project[];
             }
             const response = await api.get("/projects");
             return response.data.data as Project[];
-        }
+        },
+        staleTime: 5 * 60 * 1000,
+        refetchOnWindowFocus: false,
     });
 }
 
@@ -71,6 +71,7 @@ export function useCreateProject() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["projects"] });
+            queryClient.invalidateQueries({ queryKey: ["user-stats"] });
         },
     });
 }
@@ -85,6 +86,7 @@ export function useDeleteProject() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["projects"] });
+            queryClient.invalidateQueries({ queryKey: ["user-stats"] });
         },
     });
 }

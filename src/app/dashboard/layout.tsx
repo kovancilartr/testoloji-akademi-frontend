@@ -13,6 +13,7 @@ import { NotificationPopover } from "@/components/ui/custom-ui/dashboard-compone
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { CoachingWarning } from "@/components/ui/custom-ui/dashboard-components/CoachingWarning";
 import Link from "next/link";
+import { AiCoachAdvisor } from "@/components/analytics/AiCoachAdvisor";
 
 export default function DashboardLayout({
     children,
@@ -70,11 +71,12 @@ export default function DashboardLayout({
                     </header>
                 )}
 
-                <main className="flex-1 overflow-hidden relative flex flex-col">
+                <main className="flex-1 overflow-y-auto relative flex flex-col">
                     {children}
                 </main>
                 <ForcePasswordChangeModal />
                 <CoachingWarning />
+                <AiCoachAdvisor />
             </div>
         </div>
     );

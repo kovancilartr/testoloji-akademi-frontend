@@ -6,7 +6,25 @@ export interface UserStats {
     totalUsers: number;
     totalProjects: number;
     totalQuestions: number;
-    usersByRole: Array<{ role: string, _count: number }>;
+    totalCourses: number;
+    totalAssignments: number;
+    completedAssignments: number;
+    pendingAssignments: number;
+    totalCoachingSessions: number;
+    totalEnrollments: number;
+    activeUsersLast7Days: number;
+    newUsersLast30Days: number;
+    usersByRole: Array<{ role: string; _count: number }>;
+    usersByTier: Array<{ tier: string; _count: number }>;
+    recentUsers: Array<{ createdAt: string }>;
+    latestUsers: Array<{
+        id: string;
+        name: string;
+        email: string;
+        role: string;
+        tier: string;
+        createdAt: string;
+    }>;
 }
 
 export const useUsers = () => {
@@ -16,6 +34,8 @@ export const useUsers = () => {
             const { data } = await api.get<ApiResponse<any[]>>("/users");
             return data.data;
         },
+        staleTime: 5 * 60 * 1000, // 5 dakika cache
+        refetchOnWindowFocus: false,
     });
 };
 
@@ -26,6 +46,8 @@ export const useUserStats = () => {
             const { data } = await api.get<ApiResponse<UserStats>>("/users/stats");
             return data.data;
         },
+        staleTime: 5 * 60 * 1000, // 5 dakika cache - sayfa geçişlerinde yeniden istek atılmaz
+        refetchOnWindowFocus: false, // Pencere odaklandığında tekrar çekilmez
     });
 };
 
@@ -36,6 +58,8 @@ export const useTeacherStats = () => {
             const { data } = await api.get<ApiResponse<any>>("/users/teacher-stats");
             return data.data;
         },
+        staleTime: 5 * 60 * 1000,
+        refetchOnWindowFocus: false,
     });
 };
 

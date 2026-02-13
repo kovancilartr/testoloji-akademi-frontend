@@ -16,11 +16,13 @@ import {
     AlertCircle,
     Check,
     X,
-    ClipboardList,
-    Home,
     RotateCcw,
-    LayoutList
+    LayoutList,
+    Home,
+    ClipboardList,
+    Loader2
 } from "lucide-react";
+import { api } from "@/lib/api";
 import { use, useState, useEffect, useMemo, useCallback } from "react";
 import { Progress } from "@/components/ui/progress";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -28,7 +30,6 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Loader2 } from "lucide-react";
 import {
     Sheet,
     SheetContent,
@@ -160,6 +161,78 @@ export default function ExamPage({ params }: { params: Promise<{ assignmentId: s
 
     if (isLoading) return <FullPageLoader message="Sınav yükleniyor..." />;
     if (!exam) return <div className="p-10 text-center font-bold text-slate-500">Sınav bulunamadı.</div>;
+
+    if (exam.status === 'COMPLETED' && !isReviewMode && stats) {
+        return (
+            <div className="fixed inset-0 z-200 bg-white flex items-center justify-center p-4 animate-in fade-in duration-500 font-plus-jakarta">
+                <div className="w-full max-w-2xl bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 p-8 md:p-12 text-center space-y-8 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-orange-400 via-pink-500 to-purple-600" />
+
+                    <div className="space-y-2">
+                        <div className="w-20 h-20 bg-orange-100 text-orange-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-orange-100/50">
+                            <Trophy className="w-10 h-10" />
+                        </div>
+                        <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">
+                            Sınav Tamamlandı!
+                        </h1>
+                        <p className="text-slate-500 font-medium text-lg">
+                            Sonuçlarınız aşağıda detaylandırılmıştır.
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="p-5 rounded-2xl bg-emerald-50 border border-emerald-100 space-y-1">
+                            <div className="flex items-center justify-center gap-2 text-emerald-600 mb-2">
+                                <CheckCircle className="w-5 h-5" />
+                                <span className="font-black text-xs uppercase tracking-widest">DOĞRU</span>
+                            </div>
+                            <div className="text-3xl font-black text-emerald-700">{stats.correct}</div>
+                        </div>
+
+                        <div className="p-5 rounded-2xl bg-red-50 border border-red-100 space-y-1">
+                            <div className="flex items-center justify-center gap-2 text-red-600 mb-2">
+                                <XCircle className="w-5 h-5" />
+                                <span className="font-black text-xs uppercase tracking-widest">YANLIŞ</span>
+                            </div>
+                            <div className="text-3xl font-black text-red-700">{stats.wrong}</div>
+                        </div>
+
+                        <div className="p-5 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
+                            <div className="flex items-center justify-center gap-2 text-slate-500 mb-2">
+                                <AlertCircle className="w-5 h-5" />
+                                <span className="font-black text-xs uppercase tracking-widest">BOŞ</span>
+                            </div>
+                            <div className="text-3xl font-black text-slate-700">{stats.total - stats.correct - stats.wrong}</div>
+                        </div>
+
+                        <div className="p-5 rounded-2xl bg-blue-50 border border-blue-100 space-y-1">
+                            <div className="flex items-center justify-center gap-2 text-blue-600 mb-2">
+                                <Trophy className="w-5 h-5" />
+                                <span className="font-black text-xs uppercase tracking-widest">NET</span>
+                            </div>
+                            <div className="text-3xl font-black text-blue-700">{stats.net}</div>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                        <Button
+                            onClick={() => setIsReviewMode(true)}
+                            className="flex-1 h-14 bg-white border-2 border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 font-black text-base rounded-2xl transition-all"
+                        >
+                            CEVAPLARI İNCELE
+                        </Button>
+                        <Button
+                            onClick={() => courseId ? router.push(`/dashboard/student/library/${courseId}`) : router.push("/dashboard/student/assignments")}
+                            className="flex-1 h-14 bg-slate-900 hover:bg-slate-800 text-white font-black text-base rounded-2xl shadow-xl shadow-slate-200 transition-all"
+                        >
+                            ÇIKIŞ YAP
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
 
     const renderAnswerSheet = () => {
         return (
@@ -562,8 +635,8 @@ export default function ExamPage({ params }: { params: Promise<{ assignmentId: s
                         )}
                     </div>
                 </div>
-            </main >
-        </div >
+            </main>
+        </div>
     );
 }
 

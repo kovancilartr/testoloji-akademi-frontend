@@ -31,11 +31,25 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { UnauthorizedAccess } from "@/components/ui/custom-ui/dashboard-components/admin/UnauthorizedAccess";
 import Image from "next/image";
+import { useDeleteCourse } from "@/hooks/use-courses";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function AdminCoursesPage() {
     const { user: currentUser } = useAuth();
     const { data: courses = [], isLoading } = useAdminAllCourses();
+    const deleteMutation = useDeleteCourse();
     const [searchTerm, setSearchTerm] = useState("");
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [courseToDelete, setCourseToDelete] = useState<{ id: string, title: string } | null>(null);
 
     if (isLoading) return <FullPageLoader message="Kurslar yükleniyor..." />;
 
@@ -47,6 +61,19 @@ export default function AdminCoursesPage() {
         c.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         c.instructor.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    const handleDeleteClick = (course: any) => {
+        setCourseToDelete({ id: course.id, title: course.title });
+        setIsDeleteDialogOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        if (courseToDelete) {
+            await deleteMutation.mutateAsync(courseToDelete.id);
+            setIsDeleteDialogOpen(false);
+            setCourseToDelete(null);
+        }
+    };
 
     return (
         <div className="flex-1 flex flex-col min-h-0 bg-gray-50/50 overflow-hidden">
@@ -176,7 +203,10 @@ export default function AdminCoursesPage() {
                                                         <Eye className="h-4 w-4" /> Kursa Git
                                                     </DropdownMenuItem>
                                                     <DropdownMenuSeparator className="bg-gray-50 mx-1" />
-                                                    <DropdownMenuItem className="rounded-xl flex items-center gap-2 font-bold text-red-500 focus:bg-red-50 focus:text-red-600 cursor-pointer">
+                                                    <DropdownMenuItem
+                                                        className="rounded-xl flex items-center gap-2 font-bold text-red-500 focus:bg-red-50 focus:text-red-600 cursor-pointer"
+                                                        onClick={() => handleDeleteClick(course)}
+                                                    >
                                                         <Trash2 className="h-4 w-4" /> Kursu Sil...
                                                     </DropdownMenuItem>
                                                 </DropdownMenuContent>
@@ -204,6 +234,27 @@ export default function AdminCoursesPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                <AlertDialogContent className="rounded-[2rem] border-none shadow-2xl">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="text-xl font-black">Kursu Silmek İstediğinize Emin Misiniz?</AlertDialogTitle>
+                        <AlertDialogDescription className="text-gray-500 font-bold">
+                            <span className="text-red-500 underline">"{courseToDelete?.title}"</span> kursu ve bu kursa ait tüm modüller, içerikler ve öğrenci ilerlemeleri kalıcı olarak silinecektir. Bu işlem geri alınamaz.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="gap-2">
+                        <AlertDialogCancel className="rounded-xl font-bold border-gray-100 h-11 px-6">Vazgeç</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={confirmDelete}
+                            className="rounded-xl font-black bg-red-500 hover:bg-red-600 h-11 px-6 shadow-lg shadow-red-200"
+                        >
+                            {deleteMutation.isPending ? "Siliniyor..." : "Evet, Tamamen Sil"}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }
