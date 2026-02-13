@@ -77,7 +77,7 @@ Testoloji, hem modern bir **Soru Bankası/Dijitalleştirme** aracı hem de kapsa
 *   **Protection Layer:** Sayfaların rol bazlı korunması (`components/providers/RoleProtect.tsx`).
 *   **Custom Hooks:** API etkileşimlerinin ve karmaşık mantıkların component'lerden ayrıştırılması.
 
-## 📑 Son Güncellemeler (Bugün)
+## 📑 Son Güncellemeler (13.02.2026)
 
 Platformun kullanıcı deneyimini ve performansını artırmak amacıyla sistem genelinde köklü iyileştirmeler yapıldı.
 
