@@ -103,7 +103,7 @@ export function CourseSidebar({
                                                     {mIdx + 1}
                                                 </div>
                                                 <div className="min-w-0">
-                                                    <h4 className="text-slate-900 font-bold text-xs md:text-sm truncate uppercase tracking-tight">{module.title}</h4>
+                                                    <h4 className="text-slate-900 font-bold text-xs md:text-sm truncate tracking-tight">{module.title}</h4>
                                                     <span className="text-[10px] font-bold text-slate-400">{completedCount}/{module.contents.length} Tamamlandı</span>
                                                 </div>
                                             </div>
@@ -119,7 +119,7 @@ export function CourseSidebar({
                                                         <button
                                                             key={content.id}
                                                             className={cn(
-                                                                "w-full flex items-center gap-3 p-3 rounded-xl transition-all text-left group",
+                                                                "cursor-pointer w-full flex items-center gap-3 p-3 rounded-xl transition-all text-left group",
                                                                 isActive ? "bg-orange-50 text-orange-600 ring-1 ring-orange-100 shadow-sm" : "text-slate-500 hover:bg-white hover:shadow-sm"
                                                             )}
                                                             onClick={() => onSelectContent(content.id)}
@@ -133,11 +133,11 @@ export function CourseSidebar({
                                                                     <Circle className="w-4 h-4 text-slate-200 group-hover:text-slate-300" />
                                                                 )}
                                                             </div>
-                                                            <span className={cn("text-[11px] font-bold truncate leading-tight", isActive ? "text-orange-600" : "text-slate-600")}>
+                                                            <span className={cn("text-[14px] font-bold truncate leading-tight", isActive ? "text-orange-600" : "text-slate-600")}>
                                                                 {content.title}
                                                             </span>
-                                                            <div className="ml-auto opacity-30 group-hover:opacity-100 transition-all">
-                                                                {content.type === 'VIDEO' ? <Video className="w-3 h-3" /> : content.type === 'TEST' ? <ClipboardList className="w-3 h-3" /> : <BookOpen className="w-3 h-3" />}
+                                                            <div className="ml-auto opacity-80 group-hover:opacity-100 transition-all text-red-700">
+                                                                {content.type === 'VIDEO' ? <Video className="w-4 h-4" /> : content.type === 'TEST' ? <ClipboardList className="w-4 h-4" /> : <BookOpen className="w-4 h-4" />}
                                                             </div>
                                                         </button>
                                                     );
