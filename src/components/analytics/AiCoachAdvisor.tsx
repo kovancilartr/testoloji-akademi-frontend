@@ -18,6 +18,7 @@ import {
     BookOpen,
     ChevronUp,
     Clock,
+    X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -393,9 +394,18 @@ export function AiCoachAdvisor() {
                                 </div>
                             </div>
                         </div>
-                        <div className="bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-2 border border-white/5">
-                            <Zap className="w-3 h-3 text-orange-400 fill-orange-400" />
-                            <span className="text-[10px] font-black text-slate-300">{usage.remaining} / {usage.limit} Hak</span>
+                        <div className="flex items-center gap-2">
+                            <div className="bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-2 border border-white/5">
+                                <Zap className="w-3 h-3 text-orange-400 fill-orange-400" />
+                                <span className="text-[10px] font-black text-slate-300">{usage.remaining} / {usage.limit} Hak</span>
+                            </div>
+                            <button
+                                onClick={() => setIsOpen(false)}
+                                className="md:hidden w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center hover:bg-white/20 transition-all active:scale-90"
+                                aria-label="Kapat"
+                            >
+                                <X className="w-4 h-4 text-white" />
+                            </button>
                         </div>
                     </div>
                 </DialogHeader>
