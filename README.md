@@ -91,6 +91,13 @@ Platformun kullanıcı deneyimini ve performansını artırmak amacıyla sistem 
 - **AI Ödev Analizi:** Öğrencilerin ödev performansları AI tarafından analiz edilerek detaylı raporlar sunuluyor. Bu raporlar `static cache` stratejisi ile optimize edildi.
 - **Sistem Ayarları:** Adminler için Gemini API Key ve Model (`gemini-2.0-flash` vb.) tercihlerini yönetebilecekleri, mobil uyumlu yeni bir ayarlar paneli eklendi.
 
+#### 🧠 Desteklenen Modeller & Limitler:
+| Model | RPM | TPM | RPD | Kullanım Senaryosu |
+| :--- | :--- | :--- | :--- | :--- |
+| **2.0 Flash** | 15 | 1M | 1.500 | **Genel Kullanım (Önerilen)** |
+| **2.0 Lite** | 30 | 1M | 14.400 | **Seri Üretim / Yüksek Trafik** |
+| **2.5 Flash** | 10 | 250K | 500 | **Karmaşık Analizler** |
+
 ### 🚀 Performans & Stabilite (React Query)
 - **Global Caching:** Tüm veri çekme işlemleri (`useUsers`, `useCourses`, `useProjects`, `useAnalytics`) **5 dakikalık cache** (`staleTime`) ile hızlandırıldı. Sayfa geçişleri anlık ("lightning fast") hale getirildi.
 - **Akıllı Geçersiz Kılma:** Veri değiştirildiğinde (kurs silme, ayar güncelleme) ilgili cache'ler otomatik temizlenerek verinin her zaman doğru olması sağlandı.
