@@ -8,8 +8,8 @@ import { cn } from "@/lib/utils";
 interface StudentCourseHeaderProps {
     course: any;
     activeContent: any;
-    stats: { percent: number };
     isSidebarOpen: boolean;
+    isCinemaMode: boolean;
     onToggleSidebar: () => void;
     onBack: () => void;
 }
@@ -17,8 +17,8 @@ interface StudentCourseHeaderProps {
 export function StudentCourseHeader({
     course,
     activeContent,
-    stats,
     isSidebarOpen,
+    isCinemaMode,
     onToggleSidebar,
     onBack
 }: StudentCourseHeaderProps) {
@@ -48,24 +48,16 @@ export function StudentCourseHeader({
             </div>
 
             <div className="flex items-center gap-3">
-                <div className="hidden lg:flex items-center gap-4 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-100">
-                    <div className="text-right">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Tamamlanma Oranı</p>
-                        <p className="text-xs font-black text-orange-500 mt-1">%{stats.percent}</p>
-                    </div>
-                    <div className="w-24 h-2 bg-slate-200 rounded-full overflow-hidden">
-                        <div className="h-full bg-orange-500 transition-all duration-1000" style={{ width: `${stats.percent}%` }} />
-                    </div>
-                </div>
-
-                <Button
-                    variant="outline"
-                    size="icon"
-                    className={cn("cursor-pointer flex rounded-xl border-slate-200 transition-all", isSidebarOpen && "bg-slate-900 text-white border-slate-900 shadow-lg shadow-slate-200")}
-                    onClick={onToggleSidebar}
-                >
-                    <LayoutGrid className="w-4 h-4" />
-                </Button>
+                {!isCinemaMode && (
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        className={cn("cursor-pointer flex rounded-xl border-slate-200 transition-all", isSidebarOpen && "bg-slate-900 text-white border-slate-900 shadow-lg shadow-slate-200")}
+                        onClick={onToggleSidebar}
+                    >
+                        <LayoutGrid className="w-4 h-4" />
+                    </Button>
+                )}
             </div>
         </header>
     );

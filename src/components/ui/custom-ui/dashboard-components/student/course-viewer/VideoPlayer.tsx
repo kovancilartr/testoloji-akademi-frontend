@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useMemo } from "react";
 import dynamic from "next/dynamic";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Play, Video } from "lucide-react";
@@ -29,34 +29,21 @@ interface VideoPlayerProps {
 export function VideoPlayer({ url, isCompleted }: VideoPlayerProps) {
     const plyrRef = useRef<any>(null);
 
-    // Attach events directly to plyr instance
+    // Plyr-react handles its own internal lifecycle, manual destroy can cause "removeChild" errors
+    // in React's reconciliation process.
     useEffect(() => {
-        let plyr: any = null;
-        const interval = setInterval(() => {
-            plyr = plyrRef.current?.plyr;
-            if (plyr) clearInterval(interval);
-        }, 500);
-
         return () => {
-            clearInterval(interval);
-            if (plyr) {
-                try {
-                    if (typeof plyr.destroy === 'function') {
-                        plyr.destroy();
-                    }
-                } catch (e) {
-                    // Silently fail if already destroyed
-                }
-            }
+            // No manual destroy here to avoid conflicts with React's unmounting
         };
-    }, [url]);
+    }, []);
 
     const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
 
     if (!isYouTube) {
         return (
             <div className="h-full w-full flex flex-col items-center justify-center gap-6 p-12 text-center bg-slate-900 overflow-hidden relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 h-32 bg-linear-to-t from-black/60 to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-linear-to-br from-orange-500/10 to-transparent pointer-events-none opacity-50" />
                 <Video className="w-16 h-16 text-orange-500 animate-pulse relative z-10" />
                 <div className="space-y-4 relative z-10">
                     <h3 className="text-2xl font-black text-white uppercase tracking-tight">Harici Kaynak Hazır</h3>
@@ -74,11 +61,35 @@ export function VideoPlayer({ url, isCompleted }: VideoPlayerProps) {
 
     const videoId = getYoutubeId(url);
 
+    const plyrSource = useMemo(() => {
+        if (!videoId) return null;
+        return {
+            type: 'video' as const,
+            sources: [{ src: videoId, provider: 'youtube' as const }],
+        };
+    }, [videoId]);
+
+    const plyrOptions = useMemo(() => ({
+        autoplay: true,
+        youtube: {
+            noCookie: true,
+            rel: 0,
+            showinfo: 0,
+            iv_load_policy: 3 as const,
+            modestbranding: 1
+        },
+        settings: ['quality', 'speed'],
+        tooltips: {
+            controls: true,
+            seek: true
+        }
+    }), []);
+
     return (
         <div className="w-full h-full relative plyr-container group/video" style={{ '--plyr-color-main': '#f97316' } as any}>
             {/* YouTube Interaction Shield (from previous logic) */}
             <div
-                className="absolute inset-x-0 top-0 h-[calc(100%-60px)] z-[40] cursor-pointer"
+                className="absolute inset-x-0 top-0 h-[calc(100%-60px)] z-40 cursor-pointer"
                 onContextMenu={(e) => e.preventDefault()}
                 onClick={() => {
                     const plyr = plyrRef.current?.plyr;
@@ -86,29 +97,12 @@ export function VideoPlayer({ url, isCompleted }: VideoPlayerProps) {
                 }}
             />
 
-            {videoId && (
-                <div className="w-full h-full [&_.plyr]:h-full [&_.plyr__video-wrapper]:h-full [&_iframe]:pointer-events-none [&_.plyr__controls]:z-[60]">
+            {videoId && plyrSource && (
+                <div key={videoId} className="w-full h-full [&_.plyr]:h-full [&_.plyr__video-wrapper]:h-full [&_iframe]:pointer-events-none [&_.plyr__controls]:z-60">
                     <Plyr
                         ref={plyrRef}
-                        source={{
-                            type: 'video',
-                            sources: [{ src: videoId, provider: 'youtube' }],
-                        }}
-                        options={{
-                            autoplay: true,
-                            youtube: {
-                                noCookie: true,
-                                rel: 0,
-                                showinfo: 0,
-                                iv_load_policy: 3,
-                                modestbranding: 1
-                            },
-                            settings: ['quality', 'speed'],
-                            tooltips: {
-                                controls: true,
-                                seek: true
-                            }
-                        }}
+                        source={plyrSource}
+                        options={plyrOptions}
                     />
                 </div>
             )}

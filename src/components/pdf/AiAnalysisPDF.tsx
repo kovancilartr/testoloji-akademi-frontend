@@ -257,10 +257,85 @@ function parseMarkdownToPdfElements(content: string) {
     return elements;
 }
 
-// Parse **bold** inline text
+// Strip LaTeX expressions and convert to readable plain text
+function stripLatex(text: string): string {
+    // Replace block LaTeX $$...$$ first
+    let result = text.replace(/\$\$([\s\S]*?)\$\$/g, (_, expr) => latexToPlain(expr));
+    // Replace inline LaTeX $...$
+    result = result.replace(/\$((?:[^$\\]|\\.)+)\$/g, (_, expr) => latexToPlain(expr));
+    return result;
+}
+
+function latexToPlain(expr: string): string {
+    let text = expr.trim();
+
+    // Common LaTeX commands → readable equivalents
+    text = text.replace(/\\%/g, '%');
+    text = text.replace(/\\times/g, '×');
+    text = text.replace(/\\div/g, '÷');
+    text = text.replace(/\\cdot/g, '·');
+    text = text.replace(/\\pm/g, '±');
+    text = text.replace(/\\leq/g, '≤');
+    text = text.replace(/\\geq/g, '≥');
+    text = text.replace(/\\neq/g, '≠');
+    text = text.replace(/\\approx/g, '≈');
+    text = text.replace(/\\infty/g, '∞');
+    text = text.replace(/\\pi/g, 'π');
+    text = text.replace(/\\alpha/g, 'α');
+    text = text.replace(/\\beta/g, 'β');
+    text = text.replace(/\\theta/g, 'θ');
+    text = text.replace(/\\Delta/g, 'Δ');
+    text = text.replace(/\\sqrt\{([^}]+)\}/g, '√($1)');
+    text = text.replace(/\\sqrt\s*(\w)/g, '√$1');
+    text = text.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '$1/$2');
+    text = text.replace(/\\left/g, '');
+    text = text.replace(/\\right/g, '');
+    text = text.replace(/\\text\{([^}]+)\}/g, '$1');
+    text = text.replace(/\\textbf\{([^}]+)\}/g, '$1');
+    text = text.replace(/\\textit\{([^}]+)\}/g, '$1');
+    text = text.replace(/\\mathrm\{([^}]+)\}/g, '$1');
+    text = text.replace(/\\mathbf\{([^}]+)\}/g, '$1');
+    text = text.replace(/\\overline\{([^}]+)\}/g, '$1');
+    text = text.replace(/\\underline\{([^}]+)\}/g, '$1');
+    text = text.replace(/\\vec\{([^}]+)\}/g, '$1');
+    text = text.replace(/\\hat\{([^}]+)\}/g, '$1');
+    text = text.replace(/\\bar\{([^}]+)\}/g, '$1');
+
+    // Superscript: x^{2} → x², x^2 → x²
+    const superscripts: Record<string, string> = { '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹', 'n': 'ⁿ' };
+    text = text.replace(/\^{([^}]+)}/g, (_, sup) => {
+        return sup.split('').map((c: string) => superscripts[c] || c).join('');
+    });
+    text = text.replace(/\^(\w)/g, (_, c) => superscripts[c] || `^${c}`);
+
+    // Subscript: x_{2} → x₂, x_2 → x₂
+    const subscripts: Record<string, string> = { '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄', '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉' };
+    text = text.replace(/_{([^}]+)}/g, (_, sub) => {
+        return sub.split('').map((c: string) => subscripts[c] || c).join('');
+    });
+    text = text.replace(/_(\w)/g, (_, c) => subscripts[c] || `_${c}`);
+
+    // Remove remaining backslash commands like \quad, \, etc.
+    text = text.replace(/\\[a-zA-Z]+/g, ' ');
+    text = text.replace(/\\\\/g, ' ');
+    text = text.replace(/\\,/g, ' ');
+    text = text.replace(/\\;/g, ' ');
+    text = text.replace(/\\/g, '');
+
+    // Clean up braces and extra spaces
+    text = text.replace(/[{}]/g, '');
+    text = text.replace(/\s+/g, ' ').trim();
+
+    return text;
+}
+
+// Parse **bold** inline text and strip LaTeX
 function parseBoldInline(text: string): React.ReactNode {
-    const parts = text.split(/(\*\*[^*]+\*\*)/g);
-    if (parts.length === 1) return text;
+    // First strip LaTeX from the entire text
+    const cleanedText = stripLatex(text);
+
+    const parts = cleanedText.split(/(\*\*[^*]+\*\*)/g);
+    if (parts.length === 1) return cleanedText;
 
     return parts.map((part, idx) => {
         if (part.startsWith('**') && part.endsWith('**')) {

@@ -60,7 +60,7 @@ export default function StudentCourseViewerPage({ params }: { params: Promise<{ 
     }, [allContents, activeContent]);
 
     const stats = useMemo(() => {
-        if (!allContents.length) return { completed: 0, percent: 0 };
+        if (!allContents.length) return { completed: 0, total: 0, percent: 0 };
         const completed = allContents.filter((c: any) => c.progress && c.progress[0]?.status === 'COMPLETED').length;
         return {
             completed,
@@ -75,23 +75,24 @@ export default function StudentCourseViewerPage({ params }: { params: Promise<{ 
 
     useEffect(() => {
         if (course && allContents.length > 0) {
-            const targetId = initialContentId || allContents[0]?.id;
+            // Sadece başlangıçta veya URL'deki ID (initialContentId) değiştiğinde tetiklenir.
+            // Eğer URL'de bir ID varsa ona git, yoksa ve halihazırda bir seçim yoksa ilk derse git.
+            const targetId = initialContentId || selectedContentId || allContents[0]?.id;
 
             if (targetId && targetId !== selectedContentId) {
-                console.log("Directing to content:", targetId);
                 setSelectedContentId(targetId);
 
-                // Bu içeriği barındıran modülü bul ve aç
+                // Bu içeriği barındıran modülü bul ve yan menüde aç
                 const parentModule = course.modules.find((m: any) =>
                     m.contents.some((c: any) => c.id === targetId)
                 );
 
                 if (parentModule && !expandedModules.includes(parentModule.id)) {
-                    setExpandedModules(prev => [...new Set([...prev, parentModule.id])]);
+                    setExpandedModules([parentModule.id]);
                 }
             }
         }
-    }, [course, initialContentId]);
+    }, [course, initialContentId]); // selectedContentId bağımlılığı kaldırıldı, manuel seçimler korunacak.
 
     // Auto-mark as IN_PROGRESS when starting
     useEffect(() => {
@@ -154,13 +155,13 @@ export default function StudentCourseViewerPage({ params }: { params: Promise<{ 
     if (!course) return <div className="p-10 text-center">Kurs bulunamadı.</div>;
 
     return (
-        <div className="fixed inset-0 z-[100] bg-[#f8fafc] flex flex-col font-sans overflow-hidden">
+        <div className="fixed inset-0 z-100 bg-[#f8fafc] flex flex-col font-sans overflow-hidden">
             {/* Testoloji Branded Header */}
             <StudentCourseHeader
                 course={course}
                 activeContent={activeContent}
-                stats={stats}
                 isSidebarOpen={isSidebarOpen}
+                isCinemaMode={isCinemaMode}
                 onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
                 onBack={() => router.push('/dashboard/student/library')}
             />
@@ -171,7 +172,7 @@ export default function StudentCourseViewerPage({ params }: { params: Promise<{ 
                     course={course}
                     allContents={allContents}
                     expandedModules={expandedModules}
-                    onToggleModule={(moduleId) => setExpandedModules(prev => prev.includes(moduleId) ? prev.filter(x => x !== moduleId) : [...prev, moduleId])}
+                    onToggleModule={(moduleId) => setExpandedModules(prev => prev.includes(moduleId) ? [] : [moduleId])}
                     selectedContentId={selectedContentId}
                     onSelectContent={(contentId) => {
                         setSelectedContentId(contentId);
@@ -180,6 +181,7 @@ export default function StudentCourseViewerPage({ params }: { params: Promise<{ 
                     isSidebarOpen={isSidebarOpen}
                     onClose={() => setIsSidebarOpen(false)}
                     isCinemaMode={isCinemaMode}
+                    stats={stats}
                 />
 
                 <ActiveContentPlayer

@@ -53,28 +53,45 @@ export function ActiveContentPlayer({
         <main className="flex-1 flex flex-col min-w-0 h-full bg-[#f1f5f9] relative">
 
             {/* Size Toggle (Cinema vs Card) */}
-            <div className="absolute top-4 right-4 z-[100] hidden md:flex items-center gap-2">
-                <Button
-                    variant="secondary"
-                    size="sm"
+            <div className="absolute -top-2 right-6 z-100 hidden md:flex items-center gap-2">
+                <button
                     className={cn(
-                        "h-10 px-4 rounded-xl font-black text-[10px] cursor-pointer uppercase tracking-widest shadow-lg transition-all border border-slate-200",
-                        isCinemaMode ? "bg-slate-900 text-white border-slate-900" : "bg-white text-slate-600 hover:bg-slate-50"
+                        "h-11 px-6 rounded-b-2xl font-bold text-[11px] cursor-pointer uppercase tracking-widest transition-all duration-300 group overflow-hidden relative",
+                        isCinemaMode
+                            ? "bg-slate-900/90 hover:bg-slate-950 border-white/20 text-white shadow-2xl backdrop-blur-xl"
+                            : "bg-white/95 hover:bg-white border-slate-200 text-slate-800 shadow-xl backdrop-blur-xl"
                     )}
                     onClick={onToggleCinemaMode}
                 >
-                    {isCinemaMode ? <><Minimize2 className="w-4 h-4 mr-2" /> ODAK MODUNDAN ÇIK</> : <><Maximize2 className="w-4 h-4 mr-2" /> ODAK MODU (TAM)</>}
-                </Button>
+                    <div className="absolute inset-0 bg-linear-to-r from-transparent via-orange-500/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                    <div className="relative flex items-center gap-3">
+                        {isCinemaMode ? (
+                            <>
+                                <div className="w-5 h-5 rounded-md bg-orange-500/20 flex items-center justify-center transition-transform group-hover:scale-110">
+                                    <Minimize2 className="w-3 h-3 text-orange-400" />
+                                </div>
+                                <span className="tracking-normal font-black">Odak Modunu Kapat</span>
+                            </>
+                        ) : (
+                            <>
+                                <div className="w-6 h-6 rounded-md bg-orange-500 flex items-center justify-center transition-transform group-hover:scale-110 shadow-lg shadow-orange-500/40">
+                                    <Maximize2 className="w-3 h-3 text-white" />
+                                </div>
+                                <span className="tracking-normal font-black">Odak Modu</span>
+                            </>
+                        )}
+                    </div>
+                </button>
             </div>
 
             <div className={cn(
                 "flex-1 flex flex-col relative transition-all duration-700 ease-in-out",
-                isCinemaMode || activeContent?.type === 'TEST' ? "p-0" : "p-3 md:p-8 lg:p-12",
-                isCinemaMode ? "bg-black overflow-hidden" : "overflow-y-auto"
+                isCinemaMode || activeContent?.type === 'TEST' ? "p-0" : "p-4 md:p-6 lg:p-8",
+                isCinemaMode ? "bg-black overflow-hidden" : "overflow-y-auto scroll-smooth custom-scrollbar"
             )}>
                 <div className={cn(
-                    "mx-auto w-full transition-all duration-700 ease-in-out flex flex-col",
-                    isCinemaMode || activeContent?.type === 'TEST' ? "h-full max-w-none gap-0" : "max-w-6xl gap-8"
+                    "mx-auto w-full transition-all duration-700 ease-in-out flex flex-col min-h-0",
+                    isCinemaMode || activeContent?.type === 'TEST' ? "h-full max-w-none gap-0" : "max-w-6xl gap-5"
                 )}>
                     {!activeContent ? (
                         <div className="w-full h-[60vh] flex flex-col items-center justify-center space-y-6 bg-white rounded-[2.5rem] border border-slate-200 shadow-xl animate-in fade-in duration-1000">
@@ -111,19 +128,19 @@ export function ActiveContentPlayer({
                                     )}
 
                                     {activeContent.type === 'TEST' && (
-                                        <div className="w-full h-full flex items-center justify-center p-4 md:p-8 bg-gradient-to-br from-slate-50 via-white to-orange-50/30 overflow-y-auto">
+                                        <div className="w-full h-full flex items-center justify-center p-4 md:p-8 bg-linear-to-br from-slate-50 via-white to-orange-50/30 overflow-y-auto">
                                             <div className="max-w-4xl w-full text-center space-y-6 md:space-y-8 animate-in zoom-in-95 duration-700 py-4">
                                                 <div className="relative space-y-6 md:space-y-8">
-                                                    <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-emerald-500/5 to-orange-500/5 rounded-full -mr-32 -mt-32 blur-3xl"></div>
-                                                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-orange-500/5 to-emerald-500/5 rounded-full -ml-24 -mb-24 blur-3xl"></div>
+                                                    <div className="absolute top-0 right-0 w-64 h-64 bg-linear-to-br from-emerald-500/5 to-orange-500/5 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+                                                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-linear-to-tr from-orange-500/5 to-emerald-500/5 rounded-full -ml-24 -mb-24 blur-3xl"></div>
 
                                                     <div className="relative z-10 space-y-6 md:space-y-8">
                                                         <div className="flex justify-center">
                                                             <div className="relative">
-                                                                <div className="w-20 h-20 md:w-24 md:h-24 rounded-[1.5rem] md:rounded-[2rem] bg-gradient-to-br from-emerald-500 to-emerald-600 text-white flex items-center justify-center shadow-2xl shadow-emerald-200 relative z-10 animate-in zoom-in duration-500">
+                                                                <div className="w-20 h-20 md:w-24 md:h-24 rounded-[1.5rem] md:rounded-[2rem] bg-linear-to-br from-emerald-500 to-emerald-600 text-white flex items-center justify-center shadow-2xl shadow-emerald-200 relative z-10 animate-in zoom-in duration-500">
                                                                     <ClipboardList className="w-10 h-10 md:w-12 md:h-12" />
                                                                 </div>
-                                                                <div className="absolute inset-0 bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-[2rem] rotate-6 blur-xl opacity-40 animate-pulse"></div>
+                                                                <div className="absolute inset-0 bg-linear-to-br from-emerald-400 to-emerald-500 rounded-[2rem] rotate-6 blur-xl opacity-40 animate-pulse"></div>
                                                             </div>
                                                         </div>
 
@@ -186,7 +203,7 @@ export function ActiveContentPlayer({
                                                                         className={cn(
                                                                             "h-14 md:h-16 rounded-2xl font-black text-white transition-all flex items-center justify-center gap-3 shadow-xl",
                                                                             hasAttemptsLeft
-                                                                                ? "bg-gradient-to-r from-orange-500 to-orange-600 hover:scale-[1.02]"
+                                                                                ? "bg-linear-to-r from-orange-500 to-orange-600 hover:scale-[1.02]"
                                                                                 : "bg-slate-300 cursor-not-allowed"
                                                                         )}
                                                                         onClick={onStartExam}
@@ -207,7 +224,7 @@ export function ActiveContentPlayer({
                                                                 </div>
                                                             ) : (
                                                                 <Button
-                                                                    className="w-full h-14 md:h-16 rounded-2xl bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-black text-base md:text-lg hover:scale-[1.02] active:scale-95 shadow-2xl shadow-emerald-200/50 transition-all flex items-center justify-center gap-3 group"
+                                                                    className="w-full h-14 md:h-16 rounded-2xl bg-linear-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-black text-base md:text-lg hover:scale-[1.02] active:scale-95 shadow-2xl shadow-emerald-200/50 transition-all flex items-center justify-center gap-3 group"
                                                                     onClick={onStartExam}
                                                                     disabled={isStartingTest}
                                                                 >
@@ -295,7 +312,7 @@ export function ActiveContentPlayer({
                                     <div className="h-20 bg-white border-t border-slate-100 flex items-center justify-between px-6 md:px-10 gap-x-4">
                                         <Button
                                             variant="ghost"
-                                            className="text-slate-400 hover:text-slate-900 font-black text-[10px] uppercase tracking-widest gap-2 flex-1 md:flex-none justify-start px-2 h-12 rounded-xl"
+                                            className="cursor-pointer text-slate-400 hover:text-slate-900 font-black text-[10px] uppercase tracking-widest gap-2 flex-1 md:flex-none justify-start px-2 h-12 rounded-xl"
                                             onClick={onPrev}
                                             disabled={!hasPrev}
                                         >
@@ -305,7 +322,7 @@ export function ActiveContentPlayer({
                                         <div className="flex-1 flex justify-center">
                                             {!isCompleted ? (
                                                 <Button
-                                                    className="bg-orange-500 hover:bg-orange-600 text-white font-black h-12 px-6 md:px-10 rounded-xl md:rounded-2xl shadow-lg shadow-orange-100 transition-all active:scale-95 flex items-center gap-2 md:gap-3 text-xs md:text-sm whitespace-nowrap group"
+                                                    className="cursor-pointer bg-orange-500 hover:bg-orange-600 text-white font-black h-12 px-6 md:px-10 rounded-xl md:rounded-2xl shadow-lg shadow-orange-100 transition-all active:scale-95 flex items-center gap-2 md:gap-3 text-xs md:text-sm whitespace-nowrap group"
                                                     onClick={() => onComplete(activeContent.id)}
                                                     disabled={isCompleting}
                                                 >
@@ -317,13 +334,13 @@ export function ActiveContentPlayer({
                                             ) : (
                                                 <Button
                                                     variant="outline"
-                                                    className="h-12 px-6 md:px-10 rounded-xl md:rounded-2xl border-2 border-emerald-500 text-emerald-600 font-black shadow-lg shadow-emerald-50 transition-all hover:bg-emerald-50 flex items-center gap-2 md:gap-3 text-xs md:text-sm whitespace-nowrap group"
+                                                    className="cursor-pointer h-12 px-6 md:px-10 rounded-xl md:rounded-2xl border-2 border-emerald-500 text-emerald-600 font-black shadow-lg shadow-emerald-50 transition-all hover:bg-emerald-50 flex items-center gap-2 md:gap-3 text-xs md:text-sm whitespace-nowrap group"
                                                     onClick={() => onUndoComplete(activeContent.id)}
                                                     disabled={isCompleting}
                                                 >
                                                     {isCompleting ? (
                                                         <div className="w-4 h-4 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin" />
-                                                    ) : <RotateCcw className="w-4 h-4 transition-transform group-hover:rotate-[-45deg]" />}
+                                                    ) : <RotateCcw className="w-4 h-4 transition-transform group-hover:-rotate-45" />}
                                                     TAMAMLANDI
                                                 </Button>
                                             )}
@@ -331,7 +348,7 @@ export function ActiveContentPlayer({
 
                                         <Button
                                             variant="ghost"
-                                            className="text-slate-400 hover:text-slate-900 font-black text-[10px] uppercase tracking-widest gap-2 flex-1 md:flex-none justify-end px-2 h-12 rounded-xl"
+                                            className="cursor-pointer text-slate-400 hover:text-slate-900 font-black text-[10px] uppercase tracking-widest gap-2 flex-1 md:flex-none justify-end px-2 h-12 rounded-xl"
                                             onClick={onNext}
                                             disabled={!hasNext}
                                         >

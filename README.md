@@ -77,7 +77,49 @@ Testoloji, hem modern bir **Soru Bankası/Dijitalleştirme** aracı hem de kapsa
 *   **Protection Layer:** Sayfaların rol bazlı korunması (`components/providers/RoleProtect.tsx`).
 *   **Custom Hooks:** API etkileşimlerinin ve karmaşık mantıkların component'lerden ayrıştırılması.
 
-## 📑 Son Güncellemeler (13.02.2026)
+## 📑 Son Güncellemeler (13.02.2026 – Güncelleme 2)
+
+Bugünkü güncelleme, öğrenci ve öğretmen dashboard'larını modern ve işlevsel bir hale getirmeye, PDF çıktı kalitesini artırmaya ve arayüz çakışma sorunlarını gidermeye odaklandı.
+
+### 🏠 Öğretmen Dashboard - Yeniden Tasarım
+- **Modern Hero Section:** Zamana göre kişiselleştirilmiş selamlama ("Günaydın", "İyi günler", "İyi akşamlar") ve dekoratif gradient arka plan eklendi.
+- **Öğrenci Performans Tablosu:** Analiz sayfasındaki öğrenci verileri artık doğrudan dashboard'da görüntüleniyor:
+  - Başarıya göre sıralama ve ilk 3'e 🥇🥈🥉 madalya.
+  - Renk kodlu başarı puanları (%80+ yeşil, %60+ koyu, %40+ sarı, altı kırmızı).
+  - Doğru/Yanlış, Ortalama Net ve kayıtlı kurs bilgileri.
+  - Tıklanabilir satırlar ile öğrenci detay sayfasına yönlendirme.
+- **Sınıf Ortalaması Mini-Header:** Sınıf ortalaması ve toplam öğrenci sayısı özet bar'ı.
+- **Mobil Uyumlu Kart Görünümü:** Masaüstünde tablo, mobilde kart tasarımı ile tam responsive yapı.
+- **Sayfalama (Pagination):** 5'er 5'er öğrenci listeleme ve navigasyon kontrolleri.
+
+### 🎓 Öğrenci Dashboard - Sınav Sonuçları Entegrasyonu
+- **Son Sınav Sonuçları Tablosu:** Analiz sayfasındaki sınav verileri `useStudentAnalytics` hook'u aracılığıyla dashboard'a entegre edildi.
+- **Sınav Detay Modalı:** Tıklanan sınav için soru bazlı analiz, optik rapor ve doğru/yanlış gösterimi.
+- **AI Koç Erişimi:** Tablodaki "AI" butonuyla doğrudan AI analiz modalı açılabiliyor.
+- **Boş Durum Yönetimi:** Henüz sınav sonucu yoksa şık placeholder gösterimi.
+
+### 🔧 Select Z-Index Düzeltmesi
+- **Sorun:** Sheet (z-300) içindeki Select dropdown'ları (z-200) Sheet'in arkasında kalarak açılmıyordu.
+- **Çözüm:** `SelectContent` bileşeninin z-index'i `z-9999` olarak güncellenerek tüm overlay bileşenlerinin üstünde render edilmesi sağlandı.
+- **Etki:** Proje Ayarları panelindeki tüm select'ler (Soru Boşluğu, Sütun Sayısı, Yazı Tipi, Çalışma Modu) artık sorunsuz açılıyor.
+
+### 📄 PDF LaTeX Temizleme (AI Analiz Raporları)
+- **Sorun:** AI Koç analiz PDF'lerinde `$22,22\%$` gibi ham LaTeX kodları görünüyordu.
+- **Çözüm:** `AiAnalysisPDF.tsx` dosyasına `stripLatex` + `latexToPlain` fonksiyonları eklendi.
+- **Desteklenen Dönüşümler:**
+  | LaTeX | PDF Çıktısı |
+  | :--- | :--- |
+  | `$22,22\%$` | `22,22%` |
+  | `$x^{2}$` | `x²` |
+  | `$\frac{a}{b}$` | `a/b` |
+  | `$\sqrt{16}$` | `√(16)` |
+  | `$\pi$`, `$\alpha$` | `π`, `α` |
+  | `$x \times y$` | `x × y` |
+  | `$x \leq 18$` | `x ≤ 18` |
+
+---
+
+## 📑 Önceki Güncellemeler (13.02.2026)
 
 Platformun kullanıcı deneyimini ve performansını artırmak amacıyla sistem genelinde köklü iyileştirmeler yapıldı.
 
@@ -109,3 +151,4 @@ Platformun kullanıcı deneyimini ve performansını artırmak amacıyla sistem 
 ---
 ## 📝 Lisans
 Bu proje özel bir mülkiyettir. Tüm hakları saklıdır.
+

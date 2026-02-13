@@ -19,6 +19,7 @@ interface CourseSidebarProps {
     isSidebarOpen: boolean;
     onClose: () => void;
     isCinemaMode: boolean;
+    stats: { percent: number; completed: number; total: number };
 }
 
 export function CourseSidebar({
@@ -30,7 +31,8 @@ export function CourseSidebar({
     onSelectContent,
     isSidebarOpen,
     onClose,
-    isCinemaMode
+    isCinemaMode,
+    stats
 }: CourseSidebarProps) {
 
     const activeContent = allContents.find(c => c.id === selectedContentId);
@@ -42,14 +44,14 @@ export function CourseSidebar({
             {/* Sidebar Overlay (Mobile) */}
             {isSidebarOpen && (
                 <div
-                    className="lg:hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[110] animate-in fade-in duration-300"
+                    className="lg:hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-110 animate-in fade-in duration-300"
                     onClick={onClose}
                 />
             )}
 
             {/* Sidebar */}
             <div className={cn(
-                "fixed lg:relative inset-y-0 left-0 bg-white border-r border-slate-100 flex flex-col transition-all duration-500 ease-in-out z-[120] lg:z-40 shadow-2xl lg:shadow-none",
+                "fixed lg:relative inset-y-0 left-0 bg-white border-r border-slate-100 flex flex-col transition-all duration-500 ease-in-out z-120 lg:z-40 shadow-2xl lg:shadow-none h-full",
                 isSidebarOpen ? "w-[85vw] sm:w-[350px] lg:w-[380px]" : "w-0 -translate-x-full lg:translate-x-0 overflow-hidden border-none"
             )}>
                 <div className="flex flex-col h-full w-full">
@@ -78,7 +80,7 @@ export function CourseSidebar({
                         </div>
                     </div>
 
-                    <ScrollArea className="flex-1 custom-scrollbar scroll-smooth">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar scroll-smooth min-h-0">
                         <div className="p-4 space-y-3">
                             {course.modules.map((module: any, mIdx: number) => {
                                 const isExpanded = expandedModules.includes(module.id);
@@ -146,10 +148,25 @@ export function CourseSidebar({
                                 );
                             })}
                         </div>
-                    </ScrollArea>
+                    </div>
 
                     <div className="p-6 bg-slate-50 border-t border-slate-200">
-                        {/* TODO: Buraya Ekleme Yapılacak */}
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tamamlanma Oranı</span>
+                                <span className="text-sm font-black text-orange-500 leading-none">%{stats.percent}</span>
+                            </div>
+                            <div className="relative h-3 w-full bg-slate-200 rounded-full overflow-hidden shadow-inner">
+                                <div
+                                    className="absolute inset-y-0 left-0 bg-linear-to-r from-orange-400 to-orange-500 transition-all duration-1000 ease-out rounded-full shadow-[0_0_12px_rgba(249,115,22,0.4)]"
+                                    style={{ width: `${stats.percent}%` }}
+                                />
+                            </div>
+                            <div className="flex justify-between items-center text-[10px] font-bold text-slate-400">
+                                <span>{stats.completed} içerik</span>
+                                <span>{stats.total} toplam</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

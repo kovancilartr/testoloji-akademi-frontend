@@ -13,8 +13,10 @@ import {
     Calendar,
     Sparkles,
     ChevronRight,
+    ChevronLeft,
     TrendingUp,
     ArrowRight,
+    ArrowUpRight,
     Clock,
     Target,
     Award,
@@ -22,23 +24,43 @@ import {
     BookMarked,
     CalendarDays,
     FileText,
-    GraduationCap
+    GraduationCap,
+    Flame,
+    Star,
+    Zap
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTeacherAnalytics } from "@/hooks/use-analytics";
 import { cn } from "@/lib/utils";
 import { useThemeColors } from "@/contexts/ThemeContext";
 import { ROLE_PROJECT_LIMITS } from "@/config/limits";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
 
 export default function TeacherDashboard() {
     const { user } = useAuth();
     const router = useRouter();
     const { data: stats, isLoading } = useTeacherStats();
-    const { data: teacherAnalytics } = useTeacherAnalytics();
+    const { data: teacherAnalytics, isLoading: analyticsLoading } = useTeacherAnalytics();
     const colors = useThemeColors();
     const hasCoaching = user?.hasCoachingAccess;
+
+    // Student list pagination
+    const [studentPage, setStudentPage] = useState(1);
+    const studentsPerPage = 5;
+
+    // Greeting based on time
+    const hour = new Date().getHours();
+    const greeting = hour < 12 ? "Günaydın" : hour < 18 ? "İyi günler" : "İyi akşamlar";
 
     const statCards = [
         {
@@ -46,7 +68,9 @@ export default function TeacherDashboard() {
             value: stats?.totalProjects ?? 0,
             icon: FolderOpen,
             description: "Oluşturduğunuz testler",
-            link: "/dashboard/projects"
+            link: "/dashboard/projects",
+            color: "text-orange-500",
+            bg: "bg-orange-50"
         },
         ...(hasCoaching ? [
             {
@@ -54,21 +78,27 @@ export default function TeacherDashboard() {
                 value: stats?.totalStudents ?? 0,
                 icon: Users,
                 description: "Sınıfınızdaki öğrenciler",
-                link: "/dashboard/academy/students"
+                link: "/dashboard/academy/students",
+                color: "text-blue-500",
+                bg: "bg-blue-50"
             },
             {
                 title: "Sistem Kursları",
                 value: stats?.totalCourses ?? 0,
                 icon: BookOpen,
                 description: "Yayınladığınız kurslar",
-                link: "/dashboard/academy/courses"
+                link: "/dashboard/academy/courses",
+                color: "text-emerald-500",
+                bg: "bg-emerald-50"
             },
             {
                 title: "Bekleyen Ödevler",
                 value: stats?.totalAssignments ?? 0,
                 icon: Calendar,
                 description: "Kontrol edilecekler",
-                link: "/dashboard/academy/assignments"
+                link: "/dashboard/academy/assignments",
+                color: "text-purple-500",
+                bg: "bg-purple-50"
             }
         ] : [])
     ];
@@ -130,37 +160,46 @@ export default function TeacherDashboard() {
         }
     ] : [];
 
+    // Sorted student data (by avgGrade desc)
+    const sortedStudents = teacherAnalytics?.studentData
+        ? [...teacherAnalytics.studentData].sort((a, b) => b.avgGrade - a.avgGrade)
+        : [];
+
     return (
-        <div className="flex-1 p-8 overflow-y-auto space-y-8 custom-scrollbar bg-gradient-to-br from-gray-50 via-white to-gray-50/50 min-h-full">
-            {/* Hoşgeldiniz Bölümü */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                <div className="space-y-2">
-                    <h1 className="text-4xl font-black text-gray-900 tracking-tight flex items-center gap-3">
-                        Merhaba, {user?.name?.split(' ')[0] || 'Öğretmenim'}!
-                        <span className="animate-bounce">👋</span>
-                    </h1>
-                    <p className="text-gray-500 font-medium text-lg">
-                        Testoloji ile bugün öğrencilerinize neler hazırlayacaksınız?
-                    </p>
-                </div>
-                <div className="flex gap-3">
-                    {hasCoaching && (
+        <div className="flex-1 p-8 overflow-y-auto space-y-8 custom-scrollbar bg-linear-to-br from-gray-50 via-white to-gray-50/50 min-h-full">
+            {/* Hero Section */}
+            <div className="relative overflow-hidden rounded-3xl bg-white border border-slate-100 shadow-sm p-8 md:p-10">
+                <div className="absolute top-0 right-0 w-80 h-80 bg-linear-to-br from-orange-100 to-orange-50 rounded-full -mr-40 -mt-40 opacity-40" />
+                <div className="absolute bottom-0 left-0 w-60 h-60 bg-linear-to-tr from-indigo-100 to-indigo-50 rounded-full -ml-30 -mb-30 opacity-30" />
+                <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                    <div className="space-y-2">
+                        <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">{greeting}</p>
+                        <h1 className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">
+                            {user?.name?.split(' ')[0] || 'Öğretmenim'} Öğretmenim <span className="inline-block animate-bounce">👋</span>
+                        </h1>
+                        <p className="text-gray-500 font-medium text-base max-w-lg">
+                            Testoloji ile bugün öğrencilerinize neler hazırlayacaksınız?
+                        </p>
+                    </div>
+                    <div className="flex gap-3">
+                        {hasCoaching && (
+                            <Button
+                                onClick={() => router.push("/dashboard/academy/analytics")}
+                                variant="outline"
+                                className="cursor-pointer h-12 px-6 rounded-xl font-bold border-gray-200 hover:bg-white"
+                            >
+                                <BarChart3 className="w-4 h-4 mr-2" />
+                                Analizler
+                            </Button>
+                        )}
                         <Button
-                            onClick={() => router.push("/dashboard/academy/analytics")}
-                            variant="outline"
-                            className="h-12 px-6 rounded-xl font-bold border-gray-200 hover:bg-white"
+                            onClick={() => router.push("/dashboard/projects")}
+                            className={cn("cursor-pointer shadow-xl h-12 px-8 font-black text-base transition-all hover:scale-105 active:scale-95 group rounded-xl text-white", colors.buttonBg, colors.buttonHover, colors.shadow)}
                         >
-                            <BarChart3 className="w-4 h-4 mr-2" />
-                            Analizler
+                            <Plus className="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform" />
+                            Yeni Test Oluştur
                         </Button>
-                    )}
-                    <Button
-                        onClick={() => router.push("/dashboard/projects")}
-                        className={cn("shadow-xl h-12 px-8 font-black text-base transition-all hover:scale-105 active:scale-95 group rounded-xl text-white", colors.buttonBg, colors.buttonHover, colors.shadow)}
-                    >
-                        <Plus className="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform" />
-                        Yeni Test Oluştur
-                    </Button>
+                    </div>
                 </div>
             </div>
 
@@ -179,8 +218,8 @@ export default function TeacherDashboard() {
                         >
                             <CardContent className="p-6">
                                 <div className="flex justify-between items-start mb-4">
-                                    <div className={cn("p-3 rounded-xl transition-colors duration-300", colors.iconBg)}>
-                                        <card.icon className={cn("w-6 h-6", colors.text)} />
+                                    <div className={cn("p-3 rounded-xl transition-colors duration-300", card.bg)}>
+                                        <card.icon className={cn("w-6 h-6", card.color)} />
                                     </div>
                                     <div className="flex items-center gap-1 text-emerald-500 font-bold text-[10px] bg-emerald-50 px-2 py-1 rounded-lg">
                                         <TrendingUp className="w-3 h-3" />
@@ -212,7 +251,7 @@ export default function TeacherDashboard() {
                                     <div className={cn(
                                         "p-6 rounded-2xl shadow-lg group-hover:scale-[1.02] transition-all relative overflow-hidden h-full",
                                         action.gradient
-                                            ? cn("bg-gradient-to-br text-white", colors.gradient, colors.shadow)
+                                            ? cn("bg-linear-to-br text-white", colors.gradient, colors.shadow)
                                             : "bg-white border border-gray-100 shadow-sm"
                                     )}>
                                         <action.icon className={cn(
@@ -271,7 +310,7 @@ export default function TeacherDashboard() {
                             </div>
                             <Button
                                 variant="outline"
-                                className="w-full rounded-xl font-bold border-gray-200 hover:bg-white"
+                                className="cursor-pointer w-full rounded-xl font-bold border-gray-200 hover:bg-white"
                                 onClick={() => router.push("/dashboard/academy/analytics")}
                             >
                                 Tüm Aktiviteleri Gör
@@ -287,6 +326,212 @@ export default function TeacherDashboard() {
                             </div>
                         </div>
                     </div>
+
+                    {/* Öğrenci Performans Tablosu */}
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <GraduationCap className="w-5 h-5 text-indigo-500" />
+                                <h3 className="text-lg font-black text-slate-900">Öğrenci Performans Özeti</h3>
+                            </div>
+                            <Link href="/dashboard/academy/analytics" className="text-[11px] font-bold text-orange-500 hover:text-orange-600 uppercase tracking-wider flex items-center gap-1 group">
+                                Tüm Analiz
+                                <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                            </Link>
+                        </div>
+
+                        {analyticsLoading ? (
+                            <Skeleton className="h-48 rounded-2xl" />
+                        ) : !teacherAnalytics || sortedStudents.length === 0 ? (
+                            <div className="bg-white rounded-2xl border border-slate-100 p-8 text-center shadow-sm">
+                                <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center mx-auto mb-4">
+                                    <Users className="w-8 h-8 text-slate-300" />
+                                </div>
+                                <h4 className="font-black text-slate-900 mb-1">Henüz öğrenci verisi yok</h4>
+                                <p className="text-sm text-slate-400 font-medium max-w-xs mx-auto">Öğrencileriniz sınav çözdükçe performans verileri burada görünecek.</p>
+                            </div>
+                        ) : (
+                            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                                {/* Sınıf Ortalaması Mini Header */}
+                                <div className="px-6 py-4 bg-slate-50/80 border-b border-slate-100 flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center">
+                                                <BarChart3 className="w-4 h-4 text-indigo-600" />
+                                            </div>
+                                            <div>
+                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sınıf Ortalaması</span>
+                                                <p className="text-xl font-black text-indigo-600 leading-none">%{teacherAnalytics.averageClassGrade}</p>
+                                            </div>
+                                        </div>
+                                        <div className="hidden sm:flex items-center gap-2 ml-4 pl-4 border-l border-slate-200">
+                                            <Users className="w-4 h-4 text-slate-400" />
+                                            <span className="text-sm font-bold text-slate-600">{teacherAnalytics.totalStudents} öğrenci</span>
+                                        </div>
+                                    </div>
+                                    <Badge className="bg-emerald-50 text-emerald-600 border-emerald-200 font-black text-[9px] uppercase tracking-widest">
+                                        <TrendingUp className="w-3 h-3 mr-1" />
+                                        Yükselişte
+                                    </Badge>
+                                </div>
+
+                                {/* Desktop Table */}
+                                <div className="hidden md:block">
+                                    <Table>
+                                        <TableHeader className="bg-slate-50/30">
+                                            <TableRow className="hover:bg-transparent border-slate-100">
+                                                <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 pl-6 h-12 w-12">#</TableHead>
+                                                <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">Öğrenci</TableHead>
+                                                <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 text-center">Kayıt</TableHead>
+                                                <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 text-center">D / Y</TableHead>
+                                                <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 text-center">Ort. Net</TableHead>
+                                                <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 text-center">Başarı</TableHead>
+                                                <TableHead className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 text-right pr-6">İşlem</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {sortedStudents.slice((studentPage - 1) * studentsPerPage, studentPage * studentsPerPage).map((student, idx) => {
+                                                const rank = (studentPage - 1) * studentsPerPage + idx + 1;
+                                                const isTop3 = rank <= 3;
+                                                return (
+                                                    <TableRow
+                                                        key={student.id}
+                                                        className="hover:bg-slate-50/50 transition-all group cursor-pointer border-slate-50"
+                                                        onClick={() => router.push(`/dashboard/academy/students/${student.id}`)}
+                                                    >
+                                                        <TableCell className="pl-6 py-3">
+                                                            {isTop3 ? (
+                                                                <div className={cn(
+                                                                    "w-7 h-7 rounded-full flex items-center justify-center font-black text-xs",
+                                                                    rank === 1 ? "bg-amber-100 text-amber-700" :
+                                                                        rank === 2 ? "bg-slate-100 text-slate-600" :
+                                                                            "bg-orange-50 text-orange-600"
+                                                                )}>
+                                                                    {rank === 1 ? "🥇" : rank === 2 ? "🥈" : "🥉"}
+                                                                </div>
+                                                            ) : (
+                                                                <span className="text-xs font-bold text-slate-400 pl-2">{rank}</span>
+                                                            )}
+                                                        </TableCell>
+                                                        <TableCell className="py-3">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="w-9 h-9 rounded-lg bg-slate-50 flex items-center justify-center font-black text-sm text-slate-700 group-hover:bg-indigo-600 group-hover:text-white transition-all border border-slate-100">
+                                                                    {student.name.charAt(0)}
+                                                                </div>
+                                                                <span className="font-bold text-sm text-slate-900 group-hover:text-indigo-600 transition-colors">{student.name}</span>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell className="text-center">
+                                                            <span className="text-xs font-medium text-slate-500">{student.enrollmentCount} kurs</span>
+                                                        </TableCell>
+                                                        <TableCell className="text-center">
+                                                            <div className="flex items-center justify-center gap-2">
+                                                                <span className="text-xs font-black text-emerald-600">{student.totalCorrect}</span>
+                                                                <span className="text-slate-300">/</span>
+                                                                <span className="text-xs font-black text-rose-500">{student.totalWrong}</span>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell className="text-center">
+                                                            <span className="text-xs font-black text-indigo-600 font-mono">{student.avgNet}</span>
+                                                        </TableCell>
+                                                        <TableCell className="text-center">
+                                                            <div className={cn(
+                                                                "inline-flex px-2.5 py-1 rounded-lg shadow-sm",
+                                                                student.avgGrade >= 80 ? "bg-emerald-600 text-white" :
+                                                                    student.avgGrade >= 60 ? "bg-slate-900 text-white" :
+                                                                        student.avgGrade >= 40 ? "bg-amber-500 text-white" :
+                                                                            "bg-rose-500 text-white"
+                                                            )}>
+                                                                <span className="text-xs font-black">%{student.avgGrade}</span>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell className="text-right pr-6">
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="cursor-pointer font-bold text-[10px] uppercase text-indigo-600 hover:bg-indigo-50 rounded-lg px-2 h-7"
+                                                            >
+                                                                İncele
+                                                                <ArrowRight className="w-3 h-3 ml-1" />
+                                                            </Button>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                );
+                                            })}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+
+                                {/* Mobile Cards */}
+                                <div className="md:hidden divide-y divide-slate-100">
+                                    {sortedStudents.slice((studentPage - 1) * studentsPerPage, studentPage * studentsPerPage).map((student, idx) => {
+                                        const rank = (studentPage - 1) * studentsPerPage + idx + 1;
+                                        return (
+                                            <div
+                                                key={student.id}
+                                                className="p-4 active:bg-slate-50 transition-colors cursor-pointer"
+                                                onClick={() => router.push(`/dashboard/academy/students/${student.id}`)}
+                                            >
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                        <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center font-black text-sm text-slate-700 border border-slate-100 shrink-0">
+                                                            {rank <= 3 ? (rank === 1 ? "🥇" : rank === 2 ? "🥈" : "🥉") : student.name.charAt(0)}
+                                                        </div>
+                                                        <div className="min-w-0">
+                                                            <p className="font-bold text-sm text-slate-900 truncate">{student.name}</p>
+                                                            <p className="text-[10px] font-medium text-slate-400">{student.enrollmentCount} kurs kayıt</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className={cn(
+                                                        "inline-flex px-2 py-0.5 rounded-lg shrink-0",
+                                                        student.avgGrade >= 80 ? "bg-emerald-600 text-white" :
+                                                            student.avgGrade >= 60 ? "bg-slate-900 text-white" :
+                                                                "bg-amber-500 text-white"
+                                                    )}>
+                                                        <span className="text-xs font-black">%{student.avgGrade}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-3 pl-11">
+                                                    <span className="text-[10px] font-bold"><span className="text-emerald-600">{student.totalCorrect}D</span></span>
+                                                    <span className="text-[10px] font-bold"><span className="text-rose-500">{student.totalWrong}Y</span></span>
+                                                    <span className="text-[10px] font-bold"><span className="text-indigo-600">Net: {student.avgNet}</span></span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+
+                                {/* Pagination */}
+                                {sortedStudents.length > studentsPerPage && (
+                                    <div className="p-3 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
+                                        <p className="text-[10px] font-bold text-slate-400">
+                                            {(studentPage - 1) * studentsPerPage + 1}-{Math.min(studentPage * studentsPerPage, sortedStudents.length)} / {sortedStudents.length}
+                                        </p>
+                                        <div className="flex items-center gap-1">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                disabled={studentPage === 1}
+                                                onClick={() => setStudentPage(prev => prev - 1)}
+                                                className="cursor-pointer h-7 w-7 p-0 rounded-lg border-slate-200 disabled:opacity-30"
+                                            >
+                                                <ChevronLeft className="w-3 h-3" />
+                                            </Button>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                disabled={studentPage >= Math.ceil(sortedStudents.length / studentsPerPage)}
+                                                onClick={() => setStudentPage(prev => prev + 1)}
+                                                className="cursor-pointer h-7 w-7 p-0 rounded-lg border-slate-200 disabled:opacity-30"
+                                            >
+                                                <ChevronRight className="w-3 h-3" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
                 </>
             ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
@@ -301,7 +546,7 @@ export default function TeacherDashboard() {
                                     <div className={cn(
                                         "p-6 rounded-2xl shadow-lg group-hover:scale-[1.02] transition-all relative overflow-hidden h-full",
                                         action.gradient
-                                            ? cn("bg-gradient-to-br text-white", colors.gradient, colors.shadow)
+                                            ? cn("bg-linear-to-br text-white", colors.gradient, colors.shadow)
                                             : "bg-white border border-gray-100 shadow-sm"
                                     )}>
                                         <action.icon className={cn(
