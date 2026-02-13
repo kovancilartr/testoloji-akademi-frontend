@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useMemo } from "react";
+import { useRef, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Play, Video } from "lucide-react";
@@ -28,16 +28,16 @@ interface VideoPlayerProps {
 
 export function VideoPlayer({ url, isCompleted }: VideoPlayerProps) {
     const plyrRef = useRef<any>(null);
+    const [isMounted, setIsMounted] = useState(false);
 
-    // Plyr-react handles its own internal lifecycle, manual destroy can cause "removeChild" errors
-    // in React's reconciliation process.
     useEffect(() => {
-        return () => {
-            // No manual destroy here to avoid conflicts with React's unmounting
-        };
+        setIsMounted(true);
     }, []);
 
     const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
+
+    // ... (rest of the non-YouTube layout remains same, can be copied or kept) ...
+    // Since I need to replace the whole function to wrap Plyr with isMounted check more cleanly
 
     if (!isYouTube) {
         return (
@@ -84,6 +84,11 @@ export function VideoPlayer({ url, isCompleted }: VideoPlayerProps) {
             seek: true
         }
     }), []);
+
+    // Prevent rendering Plyr until client-side hydration is complete
+    if (!isMounted) {
+        return <div className="w-full h-full bg-slate-900 animate-pulse" />;
+    }
 
     return (
         <div className="w-full h-full relative plyr-container group/video" style={{ '--plyr-color-main': '#f97316' } as any}>
