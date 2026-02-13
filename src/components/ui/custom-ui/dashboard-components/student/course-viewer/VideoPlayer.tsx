@@ -114,7 +114,7 @@ export function VideoPlayer({ url, isCompleted }: VideoPlayerProps) {
 
             {isCompleted && (
                 <div className="absolute top-4 left-4 z-40 pointer-events-none">
-                    <Badge className="bg-emerald-500 text-white border-none font-black text-[10px] uppercase px-3 py-1.5 rounded-full shadow-lg shadow-emerald-500/20 flex items-center gap-2">
+                    <Badge className="bg-emerald-700 text-white border-none font-black text-[10px] uppercase px-3 py-1.5 rounded-full shadow-lg shadow-emerald-500/20 flex items-center gap-2">
                         <CheckCircle className="w-3 h-3" />
                         TAMAMLANDI
                     </Badge>
